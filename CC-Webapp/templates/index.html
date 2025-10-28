@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CC App - Unit Converter & Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1>CC App</h1>
+            <nav class="nav-buttons">
+                <button class="nav-btn" onclick="goToHome()">Home</button>
+                <button class="nav-btn" onclick="goToConverter()">🔄</button>
+                <button class="nav-btn" onclick="goToCalculator()">🧮</button>
+                <button class="nav-btn" onclick="goToMiscConverter()">📊</button>
+                <button class="nav-btn" onclick="goToGraphing()">📈</button>
+                <button class="nav-btn" onclick="goToAbout()">ℹ️</button>
+                <button class="nav-btn" onclick="goToSettings()">⚙️</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+
+        <!-- HOME PAGE -->
+        <div id="homePage" class="page active">
+            <div class="hero">
+                <h2>Unit Converter & Calculator</h2>
+                <p class="subtitle">Fast. Powerful. Simple.</p>
+                <p class="intro">Welcome! Convert between hundreds of units instantly, perform calculations with ease, and visualize functions with our graphing tool. Whether you need to convert length, mass, time, temperature, or work with advanced conversions—we've got you covered.</p>
+            </div>
+            <div class="button-grid">
+                <button class="nav-card" onclick="goToConverter()">🔄 Unit Converter</button>
+                <button class="nav-card" onclick="goToCalculator()">🧮 Calculator</button>
+                <button class="nav-card" onclick="goToMiscConverter()">📊 Misc Converter</button>
+                <button class="nav-card" onclick="goToGraphing()">📈 Graphing</button>
+                <button class="nav-card" onclick="goToAbout()">ℹ️ About</button>
+            </div>
+        </div>
+
+        <!-- CONVERTER PAGE -->
+        <div id="converterPage" class="page">
+            <div class="page-header">
+                <h2>Unit Converter</h2>
+                <p>Convert across Length, Mass, Time, Temperature, Area, Volume, Speed.</p>
+            </div>
+
+            <div class="form-group">
+                <label>Category:</label>
+                <select id="category" onchange="updateUnits()">
+                    <option>Length</option>
+                    <option>Mass</option>
+                    <option>Time</option>
+                    <option>Temperature</option>
+                    <option>Area</option>
+                    <option>Volume</option>
+                    <option>Speed</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>From:</label>
+                <select id="fromUnit"></select>
+            </div>
+
+            <div class="form-group">
+                <label>Value:</label>
+                <input type="number" id="inputValue" step="any" onkeypress="if(event.key==='Enter') convertUnits()">
+            </div>
+
+            <button onclick="convertUnits()" class="btn-primary">Convert</button>
+
+            <div class="results-section">
+                <h3>All Results:</h3>
+                <div id="conversionResults" class="results-grid"></div>
+            </div>
+        </div>
+
+        <!-- CALCULATOR PAGE -->
+        <div id="calculatorPage" class="page">
+            <div class="page-header">
+                <h2>Calculator</h2>
+                <p>Basic calculator with arithmetic operations.</p>
+            </div>
+
+            <div class="calculator-panel">
+                <div class="calc-display" id="calcDisplay">0</div>
+                <div class="calc-grid">
+                    <button onclick="calcInput('7')">7</button>
+                    <button onclick="calcInput('8')">8</button>
+                    <button onclick="calcInput('9')">9</button>
+                    <button onclick="calcInput('/')" class="op">÷</button>
+
+                    <button onclick="calcInput('4')">4</button>
+                    <button onclick="calcInput('5')">5</button>
+                    <button onclick="calcInput('6')">6</button>
+                    <button onclick="calcInput('*')" class="op">×</button>
+
+                    <button onclick="calcInput('1')">1</button>
+                    <button onclick="calcInput('2')">2</button>
+                    <button onclick="calcInput('3')">3</button>
+                    <button onclick="calcInput('-')" class="op">-</button>
+
+                    <button onclick="calcClear()" class="clear">C</button>
+                    <button onclick="calcInput('0')">0</button>
+                    <button onclick="calcEquals()" class="equals">=</button>
+                    <button onclick="calcInput('+')" class="op">+</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MISC CONVERTER PAGE -->
+        <div id="miscPage" class="page">
+            <div class="page-header">
+                <h2>Misc Converter</h2>
+                <p>Advanced conversions: Angle, Sound, Power, Pressure, Data, Frequency.</p>
+            </div>
+
+            <div class="form-group">
+                <label>Category:</label>
+                <select id="miscCategory" onchange="updateMiscUnits()">
+                    <option>Angle</option>
+                    <option>Sound Intensity</option>
+                    <option>Power</option>
+                    <option>Pressure</option>
+                    <option>Data</option>
+                    <option>Frequency</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>From:</label>
+                <select id="miscFromUnit"></select>
+            </div>
+
+            <div class="form-group">
+                <label>Value:</label>
+                <input type="number" id="miscInputValue" step="any" onkeypress="if(event.key==='Enter') convertMisc()">
+            </div>
+
+            <button onclick="convertMisc()" class="btn-primary">Convert</button>
+
+            <div class="results-section">
+                <h3>All Results:</h3>
+                <div id="miscResults" class="results-grid"></div>
+            </div>
+        </div>
+
+        <!-- GRAPHING PAGE -->
+        <div id="graphingPage" class="page">
+            <div class="page-header">
+                <h2>Graphing Calculator</h2>
+                <p>Plot y = f(x). Supports sin, cos, tan, exp, log, sqrt, abs, pi, e, etc.</p>
+            </div>
+
+            <div class="graph-controls">
+                <div class="control-row">
+                    <label>y = <input type="text" id="graphExpr" value="sin(x)" onkeypress="if(event.key==='Enter') graphPlot()"></label>
+                    <label>x min: <input type="number" id="graphXmin" value="-10" style="width:80px;"></label>
+                    <label>x max: <input type="number" id="graphXmax" value="10" style="width:80px;"></label>
+                </div>
+                <div class="control-row">
+                    <label><input type="checkbox" id="graphAutoY" checked onchange="toggleAutoY()"> Auto Y</label>
+                    <label>y min: <input type="number" id="graphYmin" value="-5" style="width:80px;" disabled></label>
+                    <label>y max: <input type="number" id="graphYmax" value="5" style="width:80px;" disabled></label>
+                    <button onclick="graphPlot()" class="btn-primary">Plot</button>
+                    <button onclick="graphClear()" class="btn-secondary">Clear</button>
+                </div>
+                <div id="graphMsg" class="graph-msg"></div>
+            </div>
+
+            <canvas id="graphCanvas" class="graph-canvas"></canvas>
+        </div>
+
+        <!-- SETTINGS PAGE -->
+        <div id="settingsPage" class="page">
+            <div class="page-header">
+                <h2>Settings</h2>
+                <p>Customize your experience.</p>
+            </div>
+
+            <div class="settings-group">
+                <label>Theme:</label>
+                <select id="themeSetting" onchange="applyTheme()">
+                    <option value="light">Light</option>
+                    <option value="dark" selected>Dark</option>
+                </select>
+            </div>
+
+            <div class="settings-group">
+                <label><input type="checkbox" id="enterToConvert" checked> Press Enter to Convert</label>
+            </div>
+
+            <div class="settings-group">
+                <button onclick="resetSettings()" class="btn-danger">Reset Settings</button>
+            </div>
+        </div>
+
+        <!-- ABOUT PAGE -->
+        <div id="aboutPage" class="page">
+            <div class="page-header">
+                <h2>About CC App</h2>
+            </div>
+            <div class="about-content">
+                <p><strong>CC App — Converter & Calculator</strong></p>
+                <p>Convert units across multiple categories and use built-in calculators:</p>
+                <ul>
+                    <li>Unit Converter and Misc Converter</li>
+                    <li>Basic and Graphing calculators</li>
+                    <li>Support for hundreds of units</li>
+                </ul>
+                <p><strong>Tips:</strong></p>
+                <ul>
+                    <li>Press Enter to convert/plot</li>
+                    <li>Use Home button to return to start</li>
+                </ul>
+                <p>Built with Flask, HTML, CSS, and JavaScript.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
