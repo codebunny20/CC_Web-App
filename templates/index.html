@@ -182,47 +182,126 @@
                 <p>Customize your experience.</p>
             </div>
 
-            <div class="settings-group">
-                <label>Theme:</label>
-                <select id="themeSetting" onchange="applyTheme()">
-                    <option value="light">Light</option>
-                    <option value="dark" selected>Dark</option>
-                </select>
+            <!-- Appearance -->
+            <div class="settings-section">
+                <h3>Appearance</h3>
+                <div class="settings-group">
+                    <label>Theme:</label>
+                    <select id="themeSetting" onchange="applyTheme()">
+                        <option value="light">Light</option>
+                        <option value="dark" selected>Dark</option>
+                        <option value="auto">Auto (System)</option>
+                    </select>
+                </div>
             </div>
 
-            <div class="settings-group">
-                <label><input type="checkbox" id="enterToConvert" checked> Press Enter to Convert</label>
+            <!-- Converter Preferences -->
+            <div class="settings-section">
+                <h3>Converter Preferences</h3>
+                <div class="settings-group">
+                    <label>Default Category:</label>
+                    <select id="defaultCategory">
+                        <option value="Length">Length</option>
+                        <option value="Mass">Mass</option>
+                        <option value="Time">Time</option>
+                        <option value="Temperature">Temperature</option>
+                        <option value="Area">Area</option>
+                        <option value="Volume">Volume</option>
+                        <option value="Speed">Speed</option>
+                    </select>
+                </div>
+                <div class="settings-group">
+                    <label>Decimal Places:</label>
+                    <input type="number" id="decimalPlaces" min="0" max="10" value="4" style="width:80px;">
+                </div>
+                <div class="settings-group">
+                    <label><input type="checkbox" id="enterToConvert" checked> Press Enter to Convert</label>
+                </div>
             </div>
 
-            <div class="settings-group">
-                <button onclick="resetSettings()" class="btn-danger">Reset Settings</button>
+            <!-- Calculator Settings -->
+            <div class="settings-section">
+                <h3>Calculator Settings</h3>
+                <div class="settings-group">
+                    <label><input type="checkbox" id="calcHistory" checked> Show Calculation History</label>
+                </div>
+                <div class="settings-group">
+                    <label><input type="checkbox" id="calcSound" checked> Sound Effects</label>
+                </div>
+            </div>
+
+            <!-- Graphing Settings -->
+            <div class="settings-section">
+                <h3>Graphing Settings</h3>
+                <div class="settings-group">
+                    <label>Graph Resolution:</label>
+                    <select id="graphResolution">
+                        <option value="low">Low (Faster)</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High (Slower)</option>
+                    </select>
+                </div>
+                <div class="settings-group">
+                    <label><input type="checkbox" id="gridLines" checked> Show Grid Lines</label>
+                </div>
+            </div>
+
+            <!-- Data & Privacy -->
+            <div class="settings-section">
+                <h3>Data & Privacy</h3>
+                <div class="settings-group">
+                    <label><input type="checkbox" id="saveHistory" checked> Save Conversion History</label>
+                </div>
+                <div class="settings-group">
+                    <button onclick="exportSettings()" class="btn-secondary">📥 Export Settings</button>
+                    <button onclick="importSettings()" class="btn-secondary">📤 Import Settings</button>
+                </div>
+                <div class="settings-group">
+                    <button onclick="clearHistory()" class="btn-secondary">🗑️ Clear History</button>
+                </div>
+            </div>
+
+            <!-- Reset -->
+            <div class="settings-section">
+                <h3>Advanced</h3>
+                <div class="settings-group">
+                    <button onclick="resetSettings()" class="btn-danger">⚡ Reset All Settings</button>
+                </div>
             </div>
         </div>
 
         <!-- ABOUT PAGE -->
         <div id="aboutPage" class="page">
             <div class="page-header">
-                <h2>About CC App</h2>
+            <h2>About CC App</h2>
             </div>
             <div class="about-content">
-                <p><strong>CC App — Converter & Calculator</strong></p>
-                <p>Convert units across multiple categories and use built-in calculators:</p>
-                <ul>
-                    <li>Unit Converter and Misc Converter</li>
-                    <li>Basic and Graphing calculators</li>
-                    <li>Support for hundreds of units</li>
-                </ul>
-                <p><strong>Tips:</strong></p>
-                <ul>
-                    <li>Press Enter to convert/plot</li>
-                    <li>Use Home button to return to start</li>
-                </ul>
-                <p>Built with Flask, HTML, CSS, and JavaScript.</p>
+            <p><strong>CC App — Converter & Calculator</strong></p>
+            <p>Convert units across multiple categories and use built-in calculators:</p>
+            <ul>
+                <li>Unit Converter and Misc Converter</li>
+                <li>Basic and Graphing calculators</li>
+                <li>Support for hundreds of units</li>
+            </ul>
+            <p><strong>How to Use:</strong></p>
+            <ul>
+                <li>Navigate between pages using the buttons in the header or the home page cards.</li>
+                <li>On the Unit Converter pages, select a category, choose units, and input a value to convert.</li>
+                <li>On the Calculator page, use the on-screen buttons to perform calculations.</li>
+                <li>On the Graphing page, enter a mathematical expression and adjust the range to plot graphs.</li>
+                <li>Use the Settings page to customize the theme and other preferences.</li>
+            </ul>
+            <p><strong>Tips:</strong></p>
+            <ul>
+                <li>Press Enter to convert or plot graphs quickly.</li>
+                <li>Use the Home button to return to the main page at any time.</li>
+            </ul>
+            <p>Built with Flask, HTML, CSS, and JavaScript.</p>
             </div>
         </div>
 
-    </main>
+        </main>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
+        <script src="{{ url_for('static', filename='script.js') }}"></script>
+    </body>
+    </html>
