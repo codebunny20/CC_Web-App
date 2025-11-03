@@ -18,6 +18,10 @@ function goToMiscConverter() {
 function goToGraphing() { showPage('graphingPage'); }
 function goToSettings() { showPage('settingsPage'); }
 function goToAbout() { showPage('aboutPage'); }
+function goToGameCalc() { 
+    showPage('gameCalcPage');
+    updateGameRpmUnits();
+}
 
 // ============= SETTINGS =============
 function applyTheme() {
@@ -712,6 +716,229 @@ function _graph_draw(points, xMin, xMax, yMin, yMax, expr) {
     ctx.fillStyle = '#f1f5f9';
     ctx.font = 'bold 14px sans-serif';
     ctx.fillText(`y = ${expr}`, canvas.width / 2, 20);
+}
+
+// ============= GAME CALCULATOR FUNCTIONS =============
+
+const gameRpmUnits = {
+    'RPM': ['revolutions per minute (RPM)', 'revolutions per second (RPS)', 'hertz (Hz)', 'radians per second (rad/s)'],
+    'Firearm': ['rounds per minute (RPM)', 'rounds per second (RPS)', 'rounds per hour (RPH)']
+};
+
+function updateGameRpmUnits() {
+    const type = document.getElementById('gameRpmType').value;
+    const units = gameRpmUnits[type];
+    const select = document.getElementById('gameRpmFromUnit');
+    select.innerHTML = units.map(u => `<option>${u}</option>`).join('');
+}
+
+function convertGameRpm() {
+    const type = document.getElementById('gameRpmType').value;
+    const fromUnit = document.getElementById('gameRpmFromUnit').value;
+    const value = parseFloat(document.getElementById('gameRpmValue').value);
+
+    if (isNaN(value) || value < 0) {
+        alert('Enter a valid positive number');
+        return;
+    }
+
+    const units = gameRpmUnits[type];
+    const results = document.getElementById('gameRpmResults');
+    let resultsList = '';
+
+    try {
+        units.forEach(toUnit => {
+            let result;
+            if (type === 'RPM') {
+                result = convertGameRpmStandard(fromUnit, toUnit, value);
+            } else {
+                result = convertGameRpmFirearm(fromUnit, toUnit, value);
+            }
+            const formatted = result.toFixed(6).replace(/\.?0+$/, '');
+            resultsList += `<div class="result-item"><span class="unit">${toUnit}</span><span class="value">${formatted}</span></div>`;
+        });
+    } catch (e) {
+        alert('Conversion error: ' + e.message);
+        return;
+    }
+
+    results.innerHTML = resultsList;
+}
+
+function convertGameRpmStandard(fromUnit, toUnit, value) {
+    if (fromUnit === toUnit) return value;
+    
+    const toRpm = {
+        'revolutions per minute (RPM)': 1.0,
+        'revolutions per second (RPS)': 1.0 / 60.0,
+        'hertz (Hz)': 1.0 / 60.0,
+        'radians per second (rad/s)': 1.0 / (60.0 / (2 * Math.PI))
+    };
+    
+    const fromRpm = {
+        'revolutions per minute (RPM)': 1.0,
+        'revolutions per second (RPS)': 60.0,
+        'hertz (Hz)': 60.0,
+        'radians per second (rad/s)': 60.0 / (2 * Math.PI)
+    };
+    
+    const rpmValue = value / toRpm[fromUnit];
+    return rpmValue * fromRpm[toUnit];
+}
+
+function convertGameRpmFirearm(fromUnit, toUnit, value) {
+    if (fromUnit === toUnit) return value;
+    
+    const toRpm = {
+        'rounds per minute (RPM)': 1.0,
+        'rounds per second (RPS)': 1.0 / 60.0,
+        'rounds per hour (RPH)': 1.0 / 60.0
+    };
+    
+    const fromRpm = {
+        'rounds per minute (RPM)': 1.0,
+        'rounds per second (RPS)': 60.0,
+        'rounds per hour (RPH)': 60.0
+    };
+    
+    const rpmValue = value / toRpm[fromUnit];
+    return rpmValue * fromRpm[toUnit];
+}
+
+function calculateReloadStats() {
+    const magSize = parseFloat(document.getElementById('reloadMagSize').value);
+    const reloadTime = parseFloat(document.getElementById('reloadTime').value);
+    const rps = parseFloat(document.getElementById('reloadRPS').value);
+
+    if (isNaN(magSize) || isNaN(reloadTime) || isNaN(rps) || magSize <= 0 || reloadTime <= 0 || rps <= 0) {
+        alert('Enter valid positive numbers');
+        return;
+    }
+
+    const rpm = rps * 60;
+    const roundsPerReload = magSize;
+    const timeToEmptyMag = magSize / rps;
+    const timePerRound = 1 / rps;
+    const cycleTime = reloadTime + timeToEmptyMag;
+    const avgDpsNoAccuracy = (magSize / cycleTime) * 1; // 1 damage per round placeholder
+
+    const results = `
+        <div class="result-item"><span class="unit">Fire Rate (RPM)</span><span class="value">${rpm.toFixed(0)}</span></div>
+        <div class="result-item"><span class="unit">Fire Rate (RPS)</span><span class="value">${rps.toFixed(2)}</span></div>
+        <div class="result-item"><span class="unit">Time to Empty Magazine</span><span class="value">${timeToEmptyMag.toFixed(2)}s</span></div>
+        <div class="result-item"><span class="unit">Time Per Shot</span><span class="value">${timePerRound.toFixed(3)}s</span></div>
+        <div class="result-item"><span class="unit">Reload Time</span><span class="value">${reloadTime.toFixed(2)}s</span></div>
+        <div class="result-item"><span class="unit">Full Cycle Time (Fire + Reload)</span><span class="value">${cycleTime.toFixed(2)}s</span></div>
+        <div class="result-item"><span class="unit">Rounds Per Minute (Sustained)</span><span class="value">${(magSize / cycleTime * 60).toFixed(0)}</span></div>
+    `;
+    
+    document.getElementById('reloadResults').innerHTML = results;
+}
+
+function calculateWeaponSwap() {
+    const reload1 = parseFloat(document.getElementById('weaponSwapReload1').value);
+    const reload2 = parseFloat(document.getElementById('weaponSwapReload2').value);
+    const swapTime = parseFloat(document.getElementById('weaponSwapTime').value);
+
+    if (isNaN(reload1) || isNaN(reload2) || isNaN(swapTime) || reload1 <= 0 || reload2 <= 0 || swapTime <= 0) {
+        alert('Enter valid positive numbers');
+        return;
+    }
+
+    const totalSequentialTime = reload1 + reload2 + swapTime;
+    const simultaneousTime = Math.max(reload1, reload2) + swapTime;
+    const timeSaved = totalSequentialTime - simultaneousTime;
+    const efficiencyGain = (timeSaved / totalSequentialTime * 100).toFixed(1);
+
+    const results = `
+        <div class="result-item"><span class="unit">Weapon 1 Reload Time</span><span class="value">${reload1.toFixed(2)}s</span></div>
+        <div class="result-item"><span class="unit">Weapon 2 Reload Time</span><span class="value">${reload2.toFixed(2)}s</span></div>
+        <div class="result-item"><span class="unit">Swap Time</span><span class="value">${swapTime.toFixed(2)}s</span></div>
+        <div class="result-item"><span class="unit">Sequential Time (Reload 1 → Swap → Reload 2)</span><span class="value">${totalSequentialTime.toFixed(2)}s</span></div>
+        <div class="result-item"><span class="unit">Simultaneous Time (Swap during longer reload)</span><span class="value">${simultaneousTime.toFixed(2)}s</span></div>
+        <div class="result-item"><span class="unit">Time Saved by Swapping</span><span class="value">${timeSaved.toFixed(2)}s</span></div>
+        <div class="result-item"><span class="unit">Efficiency Gain</span><span class="value">${efficiencyGain}%</span></div>
+    `;
+    
+    document.getElementById('weaponSwapResults').innerHTML = results;
+}
+
+function calculateDPS() {
+    const damage = parseFloat(document.getElementById('dpsDamage').value);
+    const rpm = parseFloat(document.getElementById('dpsRPM').value);
+    const magSize = parseFloat(document.getElementById('dpsMagSize').value);
+    const reloadTime = parseFloat(document.getElementById('dpsReloadTime').value);
+    const accuracy = parseFloat(document.getElementById('dpsAccuracy').value) / 100;
+
+    if (isNaN(damage) || isNaN(rpm) || isNaN(magSize) || isNaN(reloadTime) || isNaN(accuracy) || 
+        damage <= 0 || rpm <= 0 || magSize <= 0 || reloadTime <= 0 || accuracy < 0 || accuracy > 1) {
+        alert('Enter valid numbers');
+        return;
+    }
+
+    const rps = rpm / 60;
+    const timeToEmptyMag = magSize / rps;
+    const cycleTime = reloadTime + timeToEmptyMag;
+    const damagePerMag = damage * magSize * accuracy;
+    const dpsNoReload = damage * rps * accuracy;
+    const dpsSustained = damagePerMag / cycleTime;
+    const bulletsPerSecond = rps * accuracy;
+
+    const results = `
+        <div class="result-item"><span class="unit">Damage Per Shot</span><span class="value">${damage.toFixed(1)}</span></div>
+        <div class="result-item"><span class="unit">Fire Rate (RPS)</span><span class="value">${rps.toFixed(2)}</span></div>
+        <div class="result-item"><span class="unit">Accuracy</span><span class="value">${(accuracy * 100).toFixed(0)}%</span></div>
+        <div class="result-item"><span class="unit">Bullets Per Second (Accurate)</span><span class="value">${bulletsPerSecond.toFixed(2)}</span></div>
+        <div class="result-item"><span class="unit">DPS (No Reload Considered)</span><span class="value">${dpsNoReload.toFixed(1)}</span></div>
+        <div class="result-item"><span class="unit">DPS (Sustained with Reload)</span><span class="value">${dpsSustained.toFixed(1)}</span></div>
+        <div class="result-item"><span class="unit">Damage Per Magazine</span><span class="value">${damagePerMag.toFixed(1)}</span></div>
+        <div class="result-item"><span class="unit">Time to Empty Magazine</span><span class="value">${timeToEmptyMag.toFixed(2)}s</span></div>
+        <div class="result-item"><span class="unit">Full Cycle Time (Fire + Reload)</span><span class="value">${cycleTime.toFixed(2)}s</span></div>
+    `;
+    
+    document.getElementById('dpsResults').innerHTML = results;
+}
+
+function calculateTTK() {
+    const health = parseFloat(document.getElementById('ttkHealth').value);
+    const damage = parseFloat(document.getElementById('ttkDamage').value);
+    const rpm = parseFloat(document.getElementById('ttkRPM').value);
+    const headshotMult = parseFloat(document.getElementById('ttkHeadshotMult').value);
+
+    if (isNaN(health) || isNaN(damage) || isNaN(rpm) || isNaN(headshotMult) ||
+        health <= 0 || damage <= 0 || rpm <= 0 || headshotMult < 1) {
+        alert('Enter valid numbers');
+        return;
+    }
+
+    const rps = rpm / 60;
+    const timePerShot = 1 / rps;
+    
+    // Body shot calculations
+    const shotsToKillBody = Math.ceil(health / damage);
+    const ttkBodyShots = (shotsToKillBody - 1) * timePerShot;
+    
+    // Headshot calculations
+    const headshotDamage = damage * headshotMult;
+    const shotsToKillHeadshot = Math.ceil(health / headshotDamage);
+    const ttkHeadshots = (shotsToKillHeadshot - 1) * timePerShot;
+    
+    // Mixed (1 headshot + body)
+    const remainingHealth = health - headshotDamage;
+    const additionalBodyShots = Math.ceil(remainingHealth / damage);
+    const ttkMixed = (1 + additionalBodyShots - 1) * timePerShot;
+
+    const results = `
+        <div class="result-item"><span class="unit">Target Health</span><span class="value">${health.toFixed(0)}</span></div>
+        <div class="result-item"><span class="unit">Fire Rate (RPS)</span><span class="value">${rps.toFixed(2)}</span></div>
+        <div class="result-item"><span class="unit">Time Per Shot</span><span class="value">${timePerShot.toFixed(3)}s</span></div>
+        <div class="result-item"><span class="unit">Body Shot TTK</span><span class="value">${ttkBodyShots.toFixed(2)}s (${shotsToKillBody} shots)</span></div>
+        <div class="result-item"><span class="unit">Headshot TTK (${(headshotMult)}x damage)</span><span class="value">${ttkHeadshots.toFixed(2)}s (${shotsToKillHeadshot} shots)</span></div>
+        <div class="result-item"><span class="unit">Mixed TTK (1 Headshot + Body)</span><span class="value">${ttkMixed.toFixed(2)}s</span></div>
+        <div class="result-item"><span class="unit">Time Saved by Headshotting</span><span class="value">${(ttkBodyShots - ttkHeadshots).toFixed(2)}s</span></div>
+    `;
+    
+    document.getElementById('ttkResults').innerHTML = results;
 }
 
 // ============= INITIALIZE =============

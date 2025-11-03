@@ -26,6 +26,7 @@
                 <button class="nav-btn" onclick="goToConverter()">🔄</button>
                 <button class="nav-btn" onclick="goToCalculator()">🧮</button>
                 <button class="nav-btn" onclick="goToMiscConverter()">📊</button>
+                <button class="nav-btn" onclick="goToGameCalc()">🎮</button>
                 <button class="nav-btn" onclick="goToGraphing()">📈</button>
                 <button class="nav-btn" onclick="goToAbout()">ℹ️</button>
                 <button class="nav-btn" onclick="goToSettings()">⚙️</button>
@@ -46,6 +47,7 @@
                 <button class="nav-card" onclick="goToConverter()">🔄 Unit Converter</button>
                 <button class="nav-card" onclick="goToCalculator()">🧮 Calculator</button>
                 <button class="nav-card" onclick="goToMiscConverter()">📊 Misc Converter</button>
+                <button class="nav-card" onclick="goToGameCalc()">🎮 Game Calculator</button>
                 <button class="nav-card" onclick="goToGraphing()">📈 Graphing</button>
                 <button class="nav-card" onclick="goToAbout()">ℹ️ About</button>
             </div>
@@ -156,6 +158,124 @@
             <div class="results-section">
                 <h3>All Results:</h3>
                 <div id="miscResults" class="results-grid"></div>
+            </div>
+        </div>
+
+        <!-- GAME CALCULATOR PAGE -->
+        <div id="gameCalcPage" class="page">
+            <div class="page-header">
+                <h2>Game Calculator</h2>
+                <p>Gaming-specific conversions: RPM, reload times, weapon swap, DPS, and more.</p>
+            </div>
+
+            <!-- RPM/ROF Converter -->
+            <div class="settings-group">
+                <h3>🔄 RPM & ROF Converter</h3>
+                <div class="form-group">
+                    <label>Conversion Type:</label>
+                    <select id="gameRpmType" onchange="updateGameRpmUnits()">
+                        <option value="RPM">Standard RPM</option>
+                        <option value="Firearm">Firearm ROF</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>From:</label>
+                    <select id="gameRpmFromUnit"></select>
+                </div>
+                <div class="form-group">
+                    <label>Value:</label>
+                    <input type="number" id="gameRpmValue" step="any" onkeypress="if(event.key==='Enter') convertGameRpm()">
+                </div>
+                <button onclick="convertGameRpm()" class="btn-primary">Convert</button>
+                <div id="gameRpmResults" class="results-grid" style="margin-top: 1rem;"></div>
+            </div>
+
+            <!-- Reload Time Calculator -->
+            <div class="settings-group">
+                <h3>⏱️ Reload Time Calculator</h3>
+                <div class="form-group">
+                    <label>Magazine Size:</label>
+                    <input type="number" id="reloadMagSize" min="1" step="1" value="30">
+                </div>
+                <div class="form-group">
+                    <label>Reload Time (seconds):</label>
+                    <input type="number" id="reloadTime" min="0.1" step="0.1" value="2.5">
+                </div>
+                <div class="form-group">
+                    <label>Rounds Per Second (RPS):</label>
+                    <input type="number" id="reloadRPS" min="0.1" step="0.1" value="10">
+                </div>
+                <button onclick="calculateReloadStats()" class="btn-primary">Calculate</button>
+                <div id="reloadResults" class="results-grid" style="margin-top: 1rem;"></div>
+            </div>
+
+            <!-- Weapon Swap Time Calculator -->
+            <div class="settings-group">
+                <h3>⚔️ Weapon Swap & Rotation Time</h3>
+                <div class="form-group">
+                    <label>Weapon 1 Reload Time (s):</label>
+                    <input type="number" id="weaponSwapReload1" min="0.1" step="0.1" value="2.0">
+                </div>
+                <div class="form-group">
+                    <label>Weapon 2 Reload Time (s):</label>
+                    <input type="number" id="weaponSwapReload2" min="0.1" step="0.1" value="2.5">
+                </div>
+                <div class="form-group">
+                    <label>Swap Time (s):</label>
+                    <input type="number" id="weaponSwapTime" min="0.1" step="0.1" value="0.7">
+                </div>
+                <button onclick="calculateWeaponSwap()" class="btn-primary">Calculate</button>
+                <div id="weaponSwapResults" class="results-grid" style="margin-top: 1rem;"></div>
+            </div>
+
+            <!-- DPS Calculator -->
+            <div class="settings-group">
+                <h3>💥 DPS (Damage Per Second) Calculator</h3>
+                <div class="form-group">
+                    <label>Damage Per Shot:</label>
+                    <input type="number" id="dpsDamage" min="0.1" step="0.1" value="50">
+                </div>
+                <div class="form-group">
+                    <label>Fire Rate (Rounds Per Minute):</label>
+                    <input type="number" id="dpsRPM" min="1" step="1" value="600">
+                </div>
+                <div class="form-group">
+                    <label>Magazine Size:</label>
+                    <input type="number" id="dpsMagSize" min="1" step="1" value="30">
+                </div>
+                <div class="form-group">
+                    <label>Reload Time (seconds):</label>
+                    <input type="number" id="dpsReloadTime" min="0.1" step="0.1" value="2.0">
+                </div>
+                <div class="form-group">
+                    <label>Accuracy (0-100%):</label>
+                    <input type="number" id="dpsAccuracy" min="0" max="100" step="1" value="100">
+                </div>
+                <button onclick="calculateDPS()" class="btn-primary">Calculate</button>
+                <div id="dpsResults" class="results-grid" style="margin-top: 1rem;"></div>
+            </div>
+
+            <!-- TTK Calculator (Time To Kill) -->
+            <div class="settings-group">
+                <h3>⏰ TTK (Time To Kill) Calculator</h3>
+                <div class="form-group">
+                    <label>Target Health:</label>
+                    <input type="number" id="ttkHealth" min="1" step="1" value="100">
+                </div>
+                <div class="form-group">
+                    <label>Damage Per Shot:</label>
+                    <input type="number" id="ttkDamage" min="0.1" step="0.1" value="25">
+                </div>
+                <div class="form-group">
+                    <label>Fire Rate (Rounds Per Minute):</label>
+                    <input type="number" id="ttkRPM" min="1" step="1" value="600">
+                </div>
+                <div class="form-group">
+                    <label>Headshot Multiplier (x):</label>
+                    <input type="number" id="ttkHeadshotMult" min="1" step="0.1" value="2.0">
+                </div>
+                <button onclick="calculateTTK()" class="btn-primary">Calculate</button>
+                <div id="ttkResults" class="results-grid" style="margin-top: 1rem;"></div>
             </div>
         </div>
 
