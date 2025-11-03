@@ -97,7 +97,9 @@ MISC_UNITS = {
     "Power": list(FACTORS["POWER"].keys()),
     "Pressure": list(FACTORS["PRESSURE"].keys()),
     "Data": list(FACTORS["DATA"].keys()),
-    "Frequency": ["hertz (Hz)", "kilohertz (kHz)", "megahertz (MHz)", "gigahertz (GHz)", "terahertz (THz)"]
+    "Frequency": ["hertz (Hz)", "kilohertz (kHz)", "megahertz (MHz)", "gigahertz (GHz)", "terahertz (THz)"],
+    "RPM": ["revolutions per minute (RPM)", "revolutions per second (RPS)", "hertz (Hz)", "radians per second (rad/s)"],
+    "Firearm ROF": ["rounds per minute (RPM)", "rounds per second (RPS)", "rounds per hour (RPH)"]
 }
 
 def format_number(v):
@@ -207,6 +209,10 @@ def api_convert_misc():
                 result = linear_convert(value, from_unit, to_unit, factors)
             elif category == "Frequency":
                 result = convert_misc_frequency(from_unit, to_unit, value)
+            elif category == "RPM":
+                result = convert_misc_rpm(from_unit, to_unit, value)
+            elif category == "Firearm ROF":
+                result = convert_firearm_rof(from_unit, to_unit, value)
             results[to_unit] = format_number(result)
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
@@ -245,6 +251,52 @@ def convert_misc_frequency(from_unit, to_unit, value):
     if from_unit == to_unit:
         return value
     return value * freq_factors[from_unit] / freq_factors[to_unit]
+
+def convert_misc_rpm(from_unit, to_unit, value):
+    """Convert between RPM and related rotational/frequency units."""
+    if from_unit == to_unit:
+        return value
+    
+    # Convert to RPM as base unit
+    to_rpm = {
+        "revolutions per minute (RPM)": 1.0,
+        "revolutions per second (RPS)": 1.0 / 60.0,
+        "hertz (Hz)": 1.0 / 60.0,
+        "radians per second (rad/s)": 1.0 / (60.0 / (2 * math.pi))
+    }
+    
+    # Convert from base unit (RPM) to target
+    from_rpm = {
+        "revolutions per minute (RPM)": 1.0,
+        "revolutions per second (RPS)": 60.0,
+        "hertz (Hz)": 60.0,
+        "radians per second (rad/s)": 60.0 / (2 * math.pi)
+    }
+    
+    rpm_value = value / to_rpm[from_unit]
+    return rpm_value * from_rpm[to_unit]
+
+def convert_firearm_rof(from_unit, to_unit, value):
+    """Convert between firearm rate of fire units."""
+    if from_unit == to_unit:
+        return value
+    
+    # Convert to RPM as base unit
+    to_rpm = {
+        "rounds per minute (RPM)": 1.0,
+        "rounds per second (RPS)": 1.0 / 60.0,
+        "rounds per hour (RPH)": 1.0 / 60.0
+    }
+    
+    # Convert from base unit (RPM) to target
+    from_rpm = {
+        "rounds per minute (RPM)": 1.0,
+        "rounds per second (RPS)": 60.0,
+        "rounds per hour (RPH)": 60.0
+    }
+    
+    rpm_value = value / to_rpm[from_unit]
+    return rpm_value * from_rpm[to_unit]
 
 @app.route('/api/calculate', methods=['POST'])
 def api_calculate():

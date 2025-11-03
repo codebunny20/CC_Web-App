@@ -138,6 +138,17 @@ const miscConversionData = {
         'Kilohertz': 0.001,
         'Megahertz': 0.000001,
         'Gigahertz': 0.000000001
+    },
+    'RPM': {
+        'RPM': 1,
+        'RPS': 60,
+        'Hertz': 60,
+        'Rad/s': 9.5493
+    },
+    'Firearm ROF': {
+        'RPM': 1,
+        'RPS': 60,
+        'RPH': 1/60
     }
 };
 
