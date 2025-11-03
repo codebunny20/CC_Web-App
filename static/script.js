@@ -43,6 +43,7 @@ window.addEventListener('load', () => {
     const savedTheme = localStorage.getItem('theme') || 'dark';
     document.getElementById('themeSetting').value = savedTheme;
     applyTheme();
+    loadCalculatorState();
 });
 
 // ============= CONVERTER DATA =============
@@ -242,13 +243,82 @@ function convertSpecialMisc(value, category, fromUnit) {
     }
 }
 
-// ============= CALCULATOR FUNCTIONS =============
+// ============= CALCULATOR ENHANCEMENTS =============
 let calcDisplay = '0';
+let calcMemory = 0;
+let calcHistory = [];
+let calcScientificMode = false;
+
+function loadCalculatorState() {
+    const saved = localStorage.getItem('calcMemory');
+    const savedHistory = localStorage.getItem('calcHistory');
+    if (saved) calcMemory = parseFloat(saved);
+    if (savedHistory) {
+        try {
+            calcHistory = JSON.parse(savedHistory);
+            renderHistory();
+        } catch (e) {
+            calcHistory = [];
+        }
+    }
+    updateMemoryDisplay();
+}
+
+function saveCalculatorState() {
+    localStorage.setItem('calcMemory', calcMemory);
+    localStorage.setItem('calcHistory', JSON.stringify(calcHistory));
+}
+
+function toggleScientificMode() {
+    calcScientificMode = !calcScientificMode;
+    const basicGrid = document.getElementById('basicGrid');
+    const scientificGrid = document.getElementById('scientificGrid');
+    if (basicGrid) basicGrid.style.display = calcScientificMode ? 'none' : 'grid';
+    if (scientificGrid) scientificGrid.style.display = calcScientificMode ? 'grid' : 'none';
+}
 
 function calcInput(val) {
-    if (calcDisplay === '0' && val !== '.') calcDisplay = val;
-    else calcDisplay += val;
+    if (val === '.') {
+        if (!calcDisplay.includes('.')) calcDisplay += val;
+    } else if (val === '(' || val === ')') {
+        calcDisplay += val;
+    } else if (val === '%') {
+        calcDisplay += val;
+    } else if (calcDisplay === '0' && val !== '.') {
+        calcDisplay = val;
+    } else {
+        calcDisplay += val;
+    }
     document.getElementById('calcDisplay').textContent = calcDisplay;
+}
+
+function calcScientific(func) {
+    const expr = calcDisplay;
+    let result;
+    
+    try {
+        if (func === 'sin') result = Math.sin(eval(expr));
+        else if (func === 'cos') result = Math.cos(eval(expr));
+        else if (func === 'tan') result = Math.tan(eval(expr));
+        else if (func === 'asin') result = Math.asin(eval(expr));
+        else if (func === 'acos') result = Math.acos(eval(expr));
+        else if (func === 'atan') result = Math.atan(eval(expr));
+        else if (func === 'log') result = Math.log10(eval(expr));
+        else if (func === 'ln') result = Math.log(eval(expr));
+        else if (func === 'sqrt') result = Math.sqrt(eval(expr));
+        else if (func === 'pi') calcInput('3.14159265359');
+        else if (func === 'e') calcInput('2.71828182846');
+        
+        if (result !== undefined) {
+            addToHistory(expr, result);
+            calcDisplay = String(result.toFixed(8)).replace(/\.?0+$/, '');
+            document.getElementById('calcDisplay').textContent = calcDisplay;
+        }
+    } catch (e) {
+        calcDisplay = 'Error';
+        document.getElementById('calcDisplay').textContent = calcDisplay;
+        setTimeout(() => calcClear(), 1000);
+    }
 }
 
 function calcClear() {
@@ -258,12 +328,167 @@ function calcClear() {
 
 function calcEquals() {
     try {
-        calcDisplay = String(eval(calcDisplay));
+        const expr = calcDisplay.replace(/\^/g, '**');
+        const result = eval(expr);
+        addToHistory(calcDisplay, result);
+        calcDisplay = String(result);
         document.getElementById('calcDisplay').textContent = calcDisplay;
     } catch {
         calcDisplay = 'Error';
         document.getElementById('calcDisplay').textContent = calcDisplay;
         setTimeout(() => calcClear(), 1000);
+    }
+}
+
+function addToHistory(expression, result) {
+    calcHistory.push({
+        expr: expression,
+        result: result,
+        timestamp: new Date().toLocaleTimeString()
+    });
+    renderHistory();
+    saveCalculatorState();
+}
+
+function renderHistory() {
+    const tape = document.getElementById('historyTape');
+    if (!tape) return;
+    
+    if (calcHistory.length === 0) {
+        tape.innerHTML = '<p style="color: var(--text-dim); text-align: center; padding: 1rem;">No history</p>';
+        return;
+    }
+    
+    tape.innerHTML = calcHistory.map((item, idx) => `
+        <div class="history-item" onclick="recallFromHistory(${idx})">
+            <div class="history-item-expr">${item.expr}</div>
+            <div class="history-item-result">= ${String(item.result).substring(0, 15)}</div>
+        </div>
+    `).join('');
+}
+
+function recallFromHistory(idx) {
+    calcDisplay = String(calcHistory[idx].result);
+    document.getElementById('calcDisplay').textContent = calcDisplay;
+}
+
+function clearHistory() {
+    if (confirm('Clear calculation history?')) {
+        calcHistory = [];
+        renderHistory();
+        saveCalculatorState();
+    }
+}
+
+// ============= MEMORY FUNCTIONS =============
+function updateMemoryDisplay() {
+    const memDisplay = document.getElementById('calcMemDisplay');
+    if (!memDisplay) return;
+    
+    const display = calcMemory === 0 ? 'M: 0' : `M: ${calcMemory.toFixed(6).replace(/\.?0+$/, '')}`;
+    memDisplay.textContent = display;
+}
+
+function calcMemoryAdd() {
+    try {
+        const expr = calcDisplay.replace(/\^/g, '**');
+        const val = eval(expr);
+        calcMemory += val;
+        updateMemoryDisplay();
+        saveCalculatorState();
+    } catch (e) {
+        alert('Invalid calculation');
+    }
+}
+
+function calcMemorySubtract() {
+    try {
+        const expr = calcDisplay.replace(/\^/g, '**');
+        const val = eval(expr);
+        calcMemory -= val;
+        updateMemoryDisplay();
+        saveCalculatorState();
+    } catch (e) {
+        alert('Invalid calculation');
+    }
+}
+
+function calcMemoryRecall() {
+    calcDisplay = String(calcMemory);
+    document.getElementById('calcDisplay').textContent = calcDisplay;
+}
+
+function calcMemoryClear() {
+    calcMemory = 0;
+    updateMemoryDisplay();
+    saveCalculatorState();
+}
+
+// ============= SETTINGS FUNCTIONS =============
+function exportSettings() {
+    const settings = {
+        theme: document.getElementById('themeSetting').value,
+        defaultCategory: document.getElementById('defaultCategory').value,
+        decimalPlaces: document.getElementById('decimalPlaces').value,
+        enterToConvert: document.getElementById('enterToConvert').checked,
+        calcHistory: document.getElementById('calcHistory').checked,
+        calcSound: document.getElementById('calcSound').checked,
+        graphResolution: document.getElementById('graphResolution').value,
+        gridLines: document.getElementById('gridLines').checked,
+        saveHistory: document.getElementById('saveHistory').checked,
+        calcMemory: calcMemory,
+        calcHistoryData: calcHistory
+    };
+    
+    const dataStr = JSON.stringify(settings, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'cc-app-settings.json';
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+function importSettings() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const settings = JSON.parse(event.target.result);
+                document.getElementById('themeSetting').value = settings.theme || 'dark';
+                document.getElementById('defaultCategory').value = settings.defaultCategory || 'Length';
+                document.getElementById('decimalPlaces').value = settings.decimalPlaces || 4;
+                document.getElementById('enterToConvert').checked = settings.enterToConvert !== false;
+                document.getElementById('calcHistory').checked = settings.calcHistory !== false;
+                document.getElementById('calcSound').checked = settings.calcSound !== false;
+                document.getElementById('graphResolution').value = settings.graphResolution || 'medium';
+                document.getElementById('gridLines').checked = settings.gridLines !== false;
+                document.getElementById('saveHistory').checked = settings.saveHistory !== false;
+                if (settings.calcMemory) calcMemory = settings.calcMemory;
+                if (settings.calcHistoryData && Array.isArray(settings.calcHistoryData)) {
+                    calcHistory = settings.calcHistoryData;
+                    renderHistory();
+                }
+                applyTheme();
+                saveCalculatorState();
+                alert('Settings imported successfully!');
+            } catch (err) {
+                alert('Error importing settings: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+function drawGraph() {
+    if (graphState) {
+        _graph_draw(graphState.points, graphState.xMin, graphState.xMax, graphState.yMin, graphState.yMax, graphState.expr);
     }
 }
 
