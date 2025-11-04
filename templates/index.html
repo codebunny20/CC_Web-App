@@ -23,11 +23,19 @@
             <h1>CC App</h1>
             <nav class="nav-buttons">
                 <button class="nav-btn" onclick="goToHome()">Home</button>
-                <button class="nav-btn" onclick="goToConverter()">🔄</button>
-                <button class="nav-btn" onclick="goToCalculator()">🧮</button>
-                <button class="nav-btn" onclick="goToMiscConverter()">📊</button>
-                <button class="nav-btn" onclick="goToGameCalc()">🎮</button>
-                <button class="nav-btn" onclick="goToGraphing()">📈</button>
+                
+                <!-- Tools Dropdown -->
+                <div class="dropdown-container">
+                    <button class="nav-btn dropdown-btn" onclick="toggleDropdown()">Tools ▼</button>
+                    <div id="toolsDropdown" class="dropdown-menu">
+                        <button class="dropdown-item" onclick="goToConverter(); closeDropdown()">🔄 Unit Converter</button>
+                        <button class="dropdown-item" onclick="goToCalculator(); closeDropdown()">🧮 Calculator</button>
+                        <button class="dropdown-item" onclick="goToMiscConverter(); closeDropdown()">📊 Misc Converter</button>
+                        <button class="dropdown-item" onclick="goToGameCalc(); closeDropdown()">🎮 Game Calculator</button>
+                        <button class="dropdown-item" onclick="goToGraphing(); closeDropdown()">📈 Graphing</button>
+                    </div>
+                </div>
+
                 <button class="nav-btn" onclick="goToAbout()">ℹ️</button>
                 <button class="nav-btn" onclick="goToSettings()">⚙️</button>
             </nav>
@@ -430,8 +438,8 @@
             </div>
         </div>
 
-        </main>
+    </main>
 
-        <script src="{{ url_for('static', filename='script.js') }}"></script>
-    </body>
-    </html>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -1,5 +1,26 @@
+// ============= DROPDOWN MENU =============
+function toggleDropdown() {
+    const dropdown = document.getElementById('toolsDropdown');
+    dropdown.classList.toggle('active');
+}
+
+function closeDropdown() {
+    const dropdown = document.getElementById('toolsDropdown');
+    dropdown.classList.remove('active');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('toolsDropdown');
+    const dropdownContainer = document.querySelector('.dropdown-container');
+    if (!dropdownContainer.contains(e.target)) {
+        closeDropdown();
+    }
+});
+
 // ============= PAGE NAVIGATION =============
 function showPage(pageId) {
+    closeDropdown();
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById(pageId).classList.add('active');
     window.scrollTo(0, 0);

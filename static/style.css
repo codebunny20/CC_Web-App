@@ -90,6 +90,60 @@ body.light-theme {
     box-shadow: 0 6px 25px rgba(59, 130, 246, 0.5);
 }
 
+/* Dropdown Menu */
+.dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-btn {
+    position: relative;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    border-radius: 8px;
+    min-width: 220px;
+    margin-top: 0.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.dropdown-menu.active {
+    display: flex;
+    flex-direction: column;
+}
+
+.dropdown-item {
+    padding: 0.85rem 1.2rem;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.dropdown-item:hover {
+    background: rgba(96, 165, 250, 0.15);
+    color: var(--primary-light);
+    padding-left: 1.5rem;
+}
+
+.dropdown-item:active {
+    background: rgba(96, 165, 250, 0.25);
+}
+
 /* Main Container */
 .main-container {
     max-width: 1200px;
