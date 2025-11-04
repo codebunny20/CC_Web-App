@@ -341,6 +341,144 @@ def api_graph_sample():
     
     return jsonify({"success": True, "xs": xs, "ys": ys})
 
+@app.route('/api/game-rpm-convert', methods=['POST'])
+def api_game_rpm_convert():
+    """Convert RPM and firearm ROF units."""
+    data = request.json
+    conversion_type = data.get('conversion_type', 'RPM')
+    from_unit = data.get('from_unit')
+    value = float(data.get('value', 0))
+    
+    try:
+        if conversion_type == 'RPM':
+            rpm_units = {
+                "RPM (Revolutions/Min)": 1.0,
+                "RPS (Revolutions/Sec)": 60.0,
+                "Hz (Cycles/Sec)": 60.0,
+                "rad/s (Radians/Sec)": 60.0 / (2 * math.pi)
+            }
+        else:  # Firearm
+            rpm_units = {
+                "RPM (Rounds/Min)": 1.0,
+                "RPS (Rounds/Sec)": 60.0,
+                "RPH (Rounds/Hour)": 1.0 / 60.0
+            }
+        
+        base_value = value / rpm_units[from_unit]
+        results = {}
+        
+        for unit, factor in rpm_units.items():
+            results[unit] = format_number(base_value * factor)
+        
+        return jsonify({"success": True, "results": results})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+@app.route('/api/game-reload-stats', methods=['POST'])
+def api_game_reload_stats():
+    """Calculate reload statistics."""
+    data = request.json
+    mag_size = float(data.get('mag_size', 30))
+    reload_time = float(data.get('reload_time', 2.5))
+    rps = float(data.get('rps', 10))
+    
+    try:
+        time_to_fire_mag = mag_size / rps
+        total_cycle = reload_time + time_to_fire_mag
+        dps = (mag_size * rps) / total_cycle
+        
+        results = {
+            "Time to Fire Magazine": f"{time_to_fire_mag:.3f} seconds",
+            "Reload Time": f"{reload_time:.3f} seconds",
+            "Total Cycle Time": f"{total_cycle:.3f} seconds",
+            "DPS (Magazine Cycle)": f"{dps:.2f} damage/sec"
+        }
+        
+        return jsonify({"success": True, "results": results})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+@app.route('/api/game-weapon-swap', methods=['POST'])
+def api_game_weapon_swap():
+    """Calculate weapon swap and rotation time."""
+    data = request.json
+    reload1 = float(data.get('reload1', 2.0))
+    reload2 = float(data.get('reload2', 2.5))
+    swap_time = float(data.get('swap_time', 0.7))
+    
+    try:
+        sequence_time = reload1 + swap_time + reload2
+        
+        results = {
+            "Weapon 1 Reload": f"{reload1:.3f} seconds",
+            "Swap Time": f"{swap_time:.3f} seconds",
+            "Weapon 2 Reload": f"{reload2:.3f} seconds",
+            "Total Rotation Time": f"{sequence_time:.3f} seconds"
+        }
+        
+        return jsonify({"success": True, "results": results})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+@app.route('/api/game-dps', methods=['POST'])
+def api_game_dps():
+    """Calculate DPS with accuracy."""
+    data = request.json
+    damage = float(data.get('damage', 50))
+    rpm = float(data.get('rpm', 600))
+    mag_size = float(data.get('mag_size', 30))
+    reload_time = float(data.get('reload_time', 2.0))
+    accuracy = float(data.get('accuracy', 100)) / 100.0
+    
+    try:
+        rps = rpm / 60.0
+        time_to_mag = mag_size / rps
+        total_cycle = time_to_mag + reload_time
+        
+        sustain_dps = (mag_size * damage * accuracy) / total_cycle
+        burst_dps = mag_size * damage * accuracy * rps
+        
+        results = {
+            "Burst DPS": f"{burst_dps:.2f} damage/sec",
+            "Sustain DPS": f"{sustain_dps:.2f} damage/sec",
+            "Magazine Damage": f"{mag_size * damage * accuracy:.0f} damage",
+            "Fire Rate": f"{rps:.2f} rounds/sec"
+        }
+        
+        return jsonify({"success": True, "results": results})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+@app.route('/api/game-ttk', methods=['POST'])
+def api_game_ttk():
+    """Calculate Time To Kill."""
+    data = request.json
+    health = float(data.get('health', 100))
+    damage = float(data.get('damage', 25))
+    rpm = float(data.get('rpm', 600))
+    headshot_mult = float(data.get('headshot_mult', 2.0))
+    
+    try:
+        rps = rpm / 60.0
+        
+        shots_to_kill = math.ceil(health / damage)
+        body_ttk = (shots_to_kill - 1) / rps
+        
+        headshot_damage = damage * headshot_mult
+        shots_headshot = math.ceil(health / headshot_damage)
+        headshot_ttk = (shots_headshot - 1) / rps if shots_headshot > 0 else 0
+        
+        results = {
+            "Shots to Kill (Body)": f"{shots_to_kill} shots",
+            "TTK (Body)": f"{body_ttk:.3f} seconds",
+            "Shots to Kill (Headshot)": f"{shots_headshot} shots",
+            "TTK (Headshot)": f"{headshot_ttk:.3f} seconds"
+        }
+        
+        return jsonify({"success": True, "results": results})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({"success": False, "error": "Route not found"}), 404

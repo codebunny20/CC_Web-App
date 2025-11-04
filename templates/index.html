@@ -180,21 +180,21 @@
 
             <!-- RPM/ROF Converter -->
             <div class="settings-group">
-                <h3>🔄 RPM & ROF Converter</h3>
+                <h3>🔄 RPM & Rate of Fire Converter</h3>
                 <div class="form-group">
                     <label>Conversion Type:</label>
                     <select id="gameRpmType" onchange="updateGameRpmUnits()">
-                        <option value="RPM">Standard RPM</option>
-                        <option value="Firearm">Firearm ROF</option>
+                        <option value="RPM">Standard RPM (Rotations/Minute)</option>
+                        <option value="Firearm">Firearm ROF (Rounds/Minute)</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>From:</label>
+                    <label>From Unit:</label>
                     <select id="gameRpmFromUnit"></select>
                 </div>
                 <div class="form-group">
                     <label>Value:</label>
-                    <input type="number" id="gameRpmValue" step="any" onkeypress="if(event.key==='Enter') convertGameRpm()">
+                    <input type="number" id="gameRpmValue" step="any" onkeypress="if(event.key==='Enter') convertGameRpm()" placeholder="Enter value">
                 </div>
                 <button onclick="convertGameRpm()" class="btn-primary">Convert</button>
                 <div id="gameRpmResults" class="results-grid" style="margin-top: 1rem;"></div>

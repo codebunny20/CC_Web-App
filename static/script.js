@@ -505,3 +505,190 @@ function loadMiscConverterPreferences() {
         miscCategory.value = defaultCategory;
     }
 }
+
+// ============= GAME CALCULATOR FUNCTIONS =============
+function updateGameRpmUnits() {
+    const type = document.getElementById('gameRpmType').value;
+    const select = document.getElementById('gameRpmFromUnit');
+    
+    if (type === 'RPM') {
+        select.innerHTML = `
+            <option>RPM (Revolutions/Min)</option>
+            <option>RPS (Revolutions/Sec)</option>
+            <option>Hz (Cycles/Sec)</option>
+            <option>rad/s (Radians/Sec)</option>
+        `;
+    } else {
+        select.innerHTML = `
+            <option>RPM (Rounds/Min)</option>
+            <option>RPS (Rounds/Sec)</option>
+            <option>RPH (Rounds/Hour)</option>
+        `;
+    }
+}
+
+function convertGameRpm() {
+    const type = document.getElementById('gameRpmType').value;
+    const fromUnit = document.getElementById('gameRpmFromUnit').value;
+    const value = parseFloat(document.getElementById('gameRpmValue').value);
+    
+    if (isNaN(value)) {
+        alert('Enter a valid number');
+        return;
+    }
+
+    fetch('/api/game-rpm-convert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            conversion_type: type,
+            from_unit: fromUnit,
+            value: value
+        })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            const html = Object.entries(d.results)
+                .map(([unit, val]) => `<div class="result-item"><span class="unit">${unit}</span><span class="value">${val}</span></div>`)
+                .join('');
+            document.getElementById('gameRpmResults').innerHTML = html;
+        } else {
+            alert('Error: ' + d.error);
+        }
+    });
+}
+
+function calculateReloadStats() {
+    const magSize = parseFloat(document.getElementById('reloadMagSize').value);
+    const reloadTime = parseFloat(document.getElementById('reloadTime').value);
+    const rps = parseFloat(document.getElementById('reloadRPS').value);
+    
+    if (isNaN(magSize) || isNaN(reloadTime) || isNaN(rps)) {
+        alert('Enter valid numbers');
+        return;
+    }
+
+    fetch('/api/game-reload-stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            mag_size: magSize,
+            reload_time: reloadTime,
+            rps: rps
+        })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            const html = Object.entries(d.results)
+                .map(([label, val]) => `<div class="result-item"><span class="unit">${label}</span><span class="value">${val}</span></div>`)
+                .join('');
+            document.getElementById('reloadResults').innerHTML = html;
+        } else {
+            alert('Error: ' + d.error);
+        }
+    });
+}
+
+function calculateWeaponSwap() {
+    const reload1 = parseFloat(document.getElementById('weaponSwapReload1').value);
+    const reload2 = parseFloat(document.getElementById('weaponSwapReload2').value);
+    const swapTime = parseFloat(document.getElementById('weaponSwapTime').value);
+    
+    if (isNaN(reload1) || isNaN(reload2) || isNaN(swapTime)) {
+        alert('Enter valid numbers');
+        return;
+    }
+
+    fetch('/api/game-weapon-swap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            reload1: reload1,
+            reload2: reload2,
+            swap_time: swapTime
+        })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            const html = Object.entries(d.results)
+                .map(([label, val]) => `<div class="result-item"><span class="unit">${label}</span><span class="value">${val}</span></div>`)
+                .join('');
+            document.getElementById('weaponSwapResults').innerHTML = html;
+        } else {
+            alert('Error: ' + d.error);
+        }
+    });
+}
+
+function calculateDPS() {
+    const damage = parseFloat(document.getElementById('dpsDamage').value);
+    const rpm = parseFloat(document.getElementById('dpsRPM').value);
+    const magSize = parseFloat(document.getElementById('dpsMagSize').value);
+    const reloadTime = parseFloat(document.getElementById('dpsReloadTime').value);
+    const accuracy = parseFloat(document.getElementById('dpsAccuracy').value);
+    
+    if (isNaN(damage) || isNaN(rpm) || isNaN(magSize) || isNaN(reloadTime) || isNaN(accuracy)) {
+        alert('Enter valid numbers');
+        return;
+    }
+
+    fetch('/api/game-dps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            damage: damage,
+            rpm: rpm,
+            mag_size: magSize,
+            reload_time: reloadTime,
+            accuracy: accuracy
+        })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            const html = Object.entries(d.results)
+                .map(([label, val]) => `<div class="result-item"><span class="unit">${label}</span><span class="value">${val}</span></div>`)
+                .join('');
+            document.getElementById('dpsResults').innerHTML = html;
+        } else {
+            alert('Error: ' + d.error);
+        }
+    });
+}
+
+function calculateTTK() {
+    const health = parseFloat(document.getElementById('ttkHealth').value);
+    const damage = parseFloat(document.getElementById('ttkDamage').value);
+    const rpm = parseFloat(document.getElementById('ttkRPM').value);
+    const headshotMult = parseFloat(document.getElementById('ttkHeadshotMult').value);
+    
+    if (isNaN(health) || isNaN(damage) || isNaN(rpm) || isNaN(headshotMult)) {
+        alert('Enter valid numbers');
+        return;
+    }
+
+    fetch('/api/game-ttk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            health: health,
+            damage: damage,
+            rpm: rpm,
+            headshot_mult: headshotMult
+        })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            const html = Object.entries(d.results)
+                .map(([label, val]) => `<div class="result-item"><span class="unit">${label}</span><span class="value">${val}</span></div>`)
+                .join('');
+            document.getElementById('ttkResults').innerHTML = html;
+        } else {
+            alert('Error: ' + d.error);
+        }
+    });
+}
