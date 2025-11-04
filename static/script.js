@@ -60,8 +60,11 @@ function saveAllSettings() {
     localStorage.setItem('defaultCategory', document.getElementById('defaultCategory').value);
     localStorage.setItem('decimalPlaces', document.getElementById('decimalPlaces').value);
     localStorage.setItem('enterToConvert', document.getElementById('enterToConvert').checked);
+    localStorage.setItem('calcHistory', document.getElementById('calcHistory').checked);
+    localStorage.setItem('calcSound', document.getElementById('calcSound').checked);
     localStorage.setItem('graphResolution', document.getElementById('graphResolution').value);
     localStorage.setItem('gridLines', document.getElementById('gridLines').checked);
+    localStorage.setItem('saveHistory', document.getElementById('saveHistory').checked);
     
     settingsChanged = false;
 }
@@ -71,22 +74,29 @@ function loadAllSettings() {
     const defaultCategory = localStorage.getItem('defaultCategory') || 'Length';
     const decimalPlaces = localStorage.getItem('decimalPlaces') || '4';
     const enterToConvert = localStorage.getItem('enterToConvert') !== 'false';
+    const calcHistory = localStorage.getItem('calcHistory') !== 'false';
+    const calcSound = localStorage.getItem('calcSound') !== 'false';
     const graphResolution = localStorage.getItem('graphResolution') || 'medium';
     const gridLines = localStorage.getItem('gridLines') !== 'false';
+    const saveHistory = localStorage.getItem('saveHistory') !== 'false';
 
     document.getElementById('themeSetting').value = theme;
     document.getElementById('defaultCategory').value = defaultCategory;
     document.getElementById('decimalPlaces').value = decimalPlaces;
     document.getElementById('enterToConvert').checked = enterToConvert;
+    document.getElementById('calcHistory').checked = calcHistory;
+    document.getElementById('calcSound').checked = calcSound;
     document.getElementById('graphResolution').value = graphResolution;
     document.getElementById('gridLines').checked = gridLines;
+    document.getElementById('saveHistory').checked = saveHistory;
 }
 
 // ============= SETTINGS PAGE EVENT LISTENERS =============
 function setupSettingsListeners() {
     const settingElements = [
         'themeSetting', 'defaultCategory', 'decimalPlaces',
-        'enterToConvert', 'graphResolution', 'gridLines'
+        'enterToConvert', 'calcHistory', 'calcSound',
+        'graphResolution', 'gridLines', 'saveHistory'
     ];
 
     settingElements.forEach(id => {
@@ -353,7 +363,7 @@ function updateCalcOperation() {
                        : calcLastOperator === '-' ? '-'
                        : calcLastOperator === '*' ? '×'
                        : '÷';
-        operationDisplay.textContent = `${calcOperand} ${opSymbol}`;
+        operationDisplay.textContent = `${calcOperand} ${opSymbol} ${calcDisplay}`;
     }
 }
 
@@ -397,7 +407,7 @@ function calcInput(val) {
 function updateCalcDisplay() {
     const display = document.getElementById('calcDisplay');
     if (display) {
-        display.textContent = calcDisplay.length > 20 ? calcDisplay.slice(0, 20) : calcDisplay;
+        display.textContent = calcDisplay;
     }
 }
 
@@ -473,7 +483,6 @@ function calcEquals() {
 // ============= INITIALIZE =============
 function loadCalculatorState() {
     calcClear();
-    updateCalcDisplay();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
