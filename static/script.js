@@ -62,7 +62,6 @@ function saveAllSettings() {
     localStorage.setItem('enterToConvert', document.getElementById('enterToConvert').checked);
     localStorage.setItem('calcHistory', document.getElementById('calcHistory').checked);
     localStorage.setItem('calcSound', document.getElementById('calcSound').checked);
-    localStorage.setItem('calcSteps', document.getElementById('calcSteps').checked);
     localStorage.setItem('graphResolution', document.getElementById('graphResolution').value);
     localStorage.setItem('gridLines', document.getElementById('gridLines').checked);
     localStorage.setItem('saveHistory', document.getElementById('saveHistory').checked);
@@ -77,7 +76,6 @@ function loadAllSettings() {
     const enterToConvert = localStorage.getItem('enterToConvert') !== 'false';
     const calcHistory = localStorage.getItem('calcHistory') !== 'false';
     const calcSound = localStorage.getItem('calcSound') !== 'false';
-    const calcSteps = localStorage.getItem('calcSteps') !== 'false';
     const graphResolution = localStorage.getItem('graphResolution') || 'medium';
     const gridLines = localStorage.getItem('gridLines') !== 'false';
     const saveHistory = localStorage.getItem('saveHistory') !== 'false';
@@ -88,7 +86,6 @@ function loadAllSettings() {
     document.getElementById('enterToConvert').checked = enterToConvert;
     document.getElementById('calcHistory').checked = calcHistory;
     document.getElementById('calcSound').checked = calcSound;
-    document.getElementById('calcSteps').checked = calcSteps;
     document.getElementById('graphResolution').value = graphResolution;
     document.getElementById('gridLines').checked = gridLines;
     document.getElementById('saveHistory').checked = saveHistory;
@@ -98,7 +95,7 @@ function loadAllSettings() {
 function setupSettingsListeners() {
     const settingElements = [
         'themeSetting', 'defaultCategory', 'decimalPlaces',
-        'enterToConvert', 'calcHistory', 'calcSound', 'calcSteps',
+        'enterToConvert', 'calcHistory', 'calcSound',
         'graphResolution', 'gridLines', 'saveHistory'
     ];
 
@@ -359,16 +356,14 @@ function updateCalcOperation() {
     const operationDisplay = document.getElementById('calcOperation');
     if (!operationDisplay) return;
     
-    const showSteps = localStorage.getItem('calcSteps') !== 'false';
-    if (!showSteps) {
-        operationDisplay.textContent = '';
-        return;
-    }
-
     if (calcLastOperator === null) {
         operationDisplay.textContent = '';
     } else {
-        operationDisplay.textContent = `${calcOperand} ${calcLastOperator}`;
+        const opSymbol = calcLastOperator === '+' ? '+' 
+                       : calcLastOperator === '-' ? '-'
+                       : calcLastOperator === '*' ? '×'
+                       : '÷';
+        operationDisplay.textContent = `${calcOperand} ${opSymbol} ${calcDisplay}`;
     }
 }
 

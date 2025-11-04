@@ -595,7 +595,7 @@ body.light-theme {
 }
 
 .settings-group input[type="number"]:hover {
-    border-color: var(--primary-light);
+    border-color: var (--primary-light);
 }
 
 .settings-group input[type="number"]:focus {
