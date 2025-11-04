@@ -339,6 +339,31 @@ body.light-theme {
     box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
 }
 
+.btn-back {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(96, 165, 250, 0.15);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    border-radius: 8px;
+    color: var(--primary-light);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    background: rgba(96, 165, 250, 0.25);
+    border-color: var(--primary-light);
+    transform: translateX(-2px);
+    box-shadow: 0 4px 15px rgba(96, 165, 250, 0.2);
+}
+
+.btn-back:active {
+    transform: translateX(-1px);
+}
+
 /* Results Grid */
 .results-section {
     margin-top: 2.5rem;
