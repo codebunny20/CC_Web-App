@@ -322,22 +322,6 @@
                 <p>Customize your experience.</p>
             </div>
 
-            <!-- Appearance -->
-            <div class="settings-section">
-                <h3>🎨 Appearance</h3>
-                <div class="settings-group">
-                    <label for="themeSetting">
-                        Theme:
-                    </label>
-                    <select id="themeSetting" onchange="applyTheme()">
-                        <option value="dark">🌙 Dark</option>
-                        <option value="light">☀️ Light</option>
-                        <option value="auto">🔄 Auto (System)</option>
-                    </select>
-                    <span class="settings-label-text">Choose your preferred color scheme</span>
-                </div>
-            </div>
-
             <!-- Converter Preferences -->
             <div class="settings-section">
                 <h3>🔄 Converter Preferences</h3>
@@ -372,25 +356,6 @@
                 </div>
             </div>
 
-            <!-- Calculator Settings -->
-            <div class="settings-section">
-                <h3>🧮 Calculator Settings</h3>
-                <div class="settings-group">
-                    <label>
-                        <input type="checkbox" id="calcHistory" checked>
-                        Show Calculation History
-                    </label>
-                    <span class="settings-label-text">Keep track of past calculations</span>
-                </div>
-                <div class="settings-group">
-                    <label>
-                        <input type="checkbox" id="calcSound" checked>
-                        Sound Effects
-                    </label>
-                    <span class="settings-label-text">Enable audio feedback on calculations</span>
-                </div>
-            </div>
-
             <!-- Graphing Settings -->
             <div class="settings-section">
                 <h3>📈 Graphing Settings</h3>
@@ -411,25 +376,6 @@
                         Show Grid Lines
                     </label>
                     <span class="settings-label-text">Display grid for easier reading</span>
-                </div>
-            </div>
-
-            <!-- Data & Privacy -->
-            <div class="settings-section">
-                <h3>💾 Data & Privacy</h3>
-                <div class="settings-group">
-                    <label>
-                        <input type="checkbox" id="saveHistory" checked>
-                        Save History Locally
-                    </label>
-                    <span class="settings-label-text">Store calculations and conversions</span>
-                </div>
-                <div class="settings-group">
-                    <button onclick="exportSettings()" class="btn-secondary">📥 Export Settings</button>
-                    <button onclick="importSettings()" class="btn-secondary">📤 Import Settings</button>
-                </div>
-                <div class="settings-group">
-                    <button onclick="clearHistory()" class="btn-secondary">🗑️ Clear History</button>
                 </div>
             </div>
 
