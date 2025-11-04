@@ -377,105 +377,69 @@
             <div class="settings-section">
                 <h3>🧮 Calculator Settings</h3>
                 <div class="settings-group">
-                    <label>
+                    <label>for="graphResolution">
                         <input type="checkbox" id="calcHistory" checked>
                         Show Calculation History
-                    </label>
+                    </label>id="graphResolution">
                     <span class="settings-label-text">Keep track of past calculations</span>
-                </div>
-                <div class="settings-group">
-                    <label>
-                        <input type="checkbox" id="calcSound" checked>
+                </div>  <option value="medium" selected>⚙️ Medium</option>
+                <div class="settings-group">>🎨 High (Slower)</option>
+                    <label>t>
+                        <input type="checkbox" id="calcSound" checked>lity and performance</span>
                         Sound Effects
-                    </label>
+                    </label>settings-group">
                     <span class="settings-label-text">Enable audio feedback on calculations</span>
-                </div>
-            </div>
-
-            <!-- Graphing Settings -->
+                </div>  <input type="checkbox" id="gridLines" checked>
+            </div>      Show Grid Lines
+                    </label>
+            <!-- Graphing Settings -->ngs-label-text">Display grid for easier reading</span>
             <div class="settings-section">
                 <h3>📈 Graphing Settings</h3>
                 <div class="settings-group">
                     <label for="graphResolution">
-                        Graph Resolution:
-                    </label>
+                        Graph Resolution:>
+                    </label>ced</h3>
                     <select id="graphResolution">
-                        <option value="low">🚀 Low (Faster)</option>
-                        <option value="medium" selected>⚙️ Medium</option>
+                        <option value="low">🚀 Low (Faster)</option>ger">⚡ Reset All Settings</button>
+                        <option value="medium" selected>⚙️ Medium</option>ults (cannot be undone)</span>
                         <option value="high">🎨 High (Slower)</option>
                     </select>
                     <span class="settings-label-text">Adjust graph quality and performance</span>
                 </div>
                 <div class="settings-group">
-                    <label>
+                    <label> class="page">
                         <input type="checkbox" id="gridLines" checked>
                         Show Grid Lines
                     </label>
                     <span class="settings-label-text">Display grid for easier reading</span>
-                </div>
-            </div>
+                </div>rong>CC App — Converter & Calculator</strong></p>
+            </div>>A fast, powerful, and simple all-in-one tool for unit conversions and calculations.</p>
 
-            <!-- Data & Privacy -->
+            <!-- Advanced -->e: 1.1rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; color: var(--primary-light);">Features</h3>
             <div class="settings-section">
-                <h3>💾 Data & Privacy</h3>
-                <div class="settings-group">
-                    <label>
-                        <input type="checkbox" id="saveHistory" checked>
-                        Save History Locally
-                    </label>
-                    <span class="settings-label-text">Store calculations and conversions</span>
-                </div>
-                <div class="settings-group">
-                    <button onclick="exportSettings()" class="btn-secondary">📥 Export Settings</button>
-                    <button onclick="importSettings()" class="btn-secondary">📤 Import Settings</button>
-                </div>
-                <div class="settings-group">
-                    <button onclick="clearHistory()" class="btn-secondary">🗑️ Clear History</button>
-                </div>
+                <h3>⚙️ Advanced</h3>rter:</strong> Length, Mass, Time, Temperature, Area, Volume, Speed</li>
+                <div class="settings-group">er:</strong> Angle, Sound, Power, Pressure, Data, Frequency, RPM, Firearm ROF</li>
+                    <button onclick="resetSettings()" class="btn-danger">⚡ Reset All Settings</button>rong>Calculator:</strong> Full arithmetic operations with real-time display and operation history</li>
+                    <span class="settings-label-text">Restore factory defaults (cannot be undone)</span>d stats, DPS, TTK, and weapon swap optimization</li>
+                </div>trong> Plot mathematical functions with auto-scaling</li>
             </div>
 
-            <!-- Advanced -->
-            <div class="settings-section">
-                <h3>⚙️ Advanced</h3>
-                <div class="settings-group">
-                    <button onclick="resetSettings()" class="btn-danger">⚡ Reset All Settings</button>
-                    <span class="settings-label-text">Restore factory defaults (cannot be undone)</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- ABOUT PAGE -->
-        <div id="aboutPage" class="page">
-            <div class="page-header">
-                <h2>About CC App</h2>
-            </div>
-            <div class="about-content">
-                <p><strong>CC App — Converter & Calculator</strong></p>
-                <p>A fast, powerful, and simple all-in-one tool for unit conversions and calculations.</p>
-
-                <h3 style="font-size: 1.1rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; color: var(--primary-light);">Features</h3>
+yle="font-size: 1.1rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; color: var(--primary-light);">Quick Tips</h3>
                 <ul>
-                    <li><strong>Unit Converter:</strong> Length, Mass, Time, Temperature, Area, Volume, Speed</li>
+                    <li>Press <strong>Enter</strong> to quickly convert or plot</li>
+                    <li>Use <strong>Settings</strong> to customize theme and preferences</li>
+                    <li>Export/Import settings as JSON for backup</li>out CC App</h2>
+                    <li>Calculator history is saved locally</li>
+                </ul>
+rong>CC App — Converter & Calculator</strong></p>
+                <p style="margin-top: 2rem; font-size: 0.95rem; color: var(--text-dim);">Built with Flask, HTML, CSS, and JavaScript</p>>A fast, powerful, and simple all-in-one tool for unit conversions and calculations.</p>
+            </div>
+        </div>nt-size: 1.1rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; color: var(--primary-light);">Features</h3>
+
+    </main> Converter:</strong> Length, Mass, Time, Temperature, Area, Volume, Speed</li>
                     <li><strong>Misc Converter:</strong> Angle, Sound, Power, Pressure, Data, Frequency, RPM, Firearm ROF</li>
                     <li><strong>Calculator:</strong> Full arithmetic operations with real-time display and operation history</li>
                     <li><strong>Game Calculator:</strong> RPM/ROF, reload stats, DPS, TTK, and weapon swap optimization</li>
                     <li><strong>Graphing:</strong> Plot mathematical functions with auto-scaling</li>
                 </ul>
-
-                <h3 style="font-size: 1.1rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; color: var(--primary-light);">Quick Tips</h3>
-                <ul>
-                    <li>Press <strong>Enter</strong> to quickly convert or plot</li>
-                    <li>Use <strong>Settings</strong> to customize theme and preferences</li>
-                    <li>Export/Import settings as JSON for backup</li>
-                    <li>Calculator history is saved locally</li>
-                </ul>
-
-                <p style="margin-top: 2rem; font-size: 0.95rem; color: var(--text-dim);">Built with Flask, HTML, CSS, and JavaScript</p>
-            </div>
-        </div>
-
-    </main>
-
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; color: var(--primary-light);">Quick Tips</h3>                <ul>                    <li>Press <strong>Enter</strong> to quickly convert or plot</li>                    <li>Use <strong>Settings</strong> to customize theme and preferences</li>                    <li>Export/Import settings as JSON for backup</li>                    <li>Calculator history is saved locally</li>                </ul>                <p style="margin-top: 2rem; font-size: 0.95rem; color: var(--text-dim);">Built with Flask, HTML, CSS, and JavaScript</p>            </div>        </div>    </main>    <script src="{{ url_for('static', filename='script.js') }}"></script></body></html>.;.
