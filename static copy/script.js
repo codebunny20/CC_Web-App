@@ -348,8 +348,7 @@ function convertSpecialMisc(value, category, fromUnit, decimalPlaces) {
 
 // ============= CALCULATOR =============
 let calcDisplay = '0';
-let calcOperand = null;
-let calcLastOperator = null;
+let lastOperator = null;
 let shouldResetDisplay = false;
 
 function calcInput(val) {
@@ -359,7 +358,7 @@ function calcInput(val) {
             calcDisplay = val;
             shouldResetDisplay = false;
         } else {
-            if (calcDisplay === '0') {
+            if (calcDisplay === '0' && val !== '.') {
                 calcDisplay = val;
             } else if (calcDisplay.length < 15) {
                 calcDisplay += val;
@@ -377,11 +376,12 @@ function calcInput(val) {
     }
     // Handle operators
     else if (['+', '-', '*', '/'].includes(val)) {
-        if (calcLastOperator !== null && !shouldResetDisplay) {
-            calcEquals();
+        if (!shouldResetDisplay && calcDisplay !== '0' && calcDisplay !== '') {
+            if (lastOperator && !shouldResetDisplay) {
+                calcEquals();
+            }
         }
-        calcOperand = parseFloat(calcDisplay);
-        calcLastOperator = val;
+        lastOperator = val;
         shouldResetDisplay = true;
     }
 
@@ -397,63 +397,32 @@ function updateCalcDisplay() {
 
 function calcClear() {
     calcDisplay = '0';
-    calcOperand = null;
-    calcLastOperator = null;
+    lastOperator = null;
     shouldResetDisplay = false;
     updateCalcDisplay();
 }
 
 function calcEquals() {
-    if (calcLastOperator === null || calcOperand === null) {
-        return;
-    }
-
     try {
-        const current = parseFloat(calcDisplay);
-        let result;
-
-        switch (calcLastOperator) {
-            case '+':
-                result = calcOperand + current;
-                break;
-            case '-':
-                result = calcOperand - current;
-                break;
-            case '*':
-                result = calcOperand * current;
-                break;
-            case '/':
-                if (current === 0) {
-                    calcDisplay = 'Error';
-                    calcLastOperator = null;
-                    calcOperand = null;
-                    shouldResetDisplay = true;
-                    updateCalcDisplay();
-                    setTimeout(() => calcClear(), 1500);
-                    return;
-                }
-                result = calcOperand / current;
-                break;
-            default:
-                return;
+        const expr = calcDisplay.replace(/÷/g, '/').replace(/×/g, '*');
+        
+        if (!expr || expr === '0' || expr === '.' || /[+\-*/.()]$/.test(expr)) {
+            return;
         }
-
+        
+        const result = Function('"use strict"; return (' + expr + ')')();
+        
         if (!isFinite(result)) {
-            calcDisplay = 'Error';
-        } else {
-            calcDisplay = result.toString().length > 15 
-                ? result.toFixed(8).replace(/\.?0+$/, '') 
-                : result.toString();
+            throw new Error('Invalid calculation');
         }
-
-        calcLastOperator = null;
-        calcOperand = null;
+        
+        calcDisplay = result.toString().length > 15 ? result.toFixed(8).replace(/\.?0+$/, '') : result.toString();
+        lastOperator = null;
         shouldResetDisplay = true;
         updateCalcDisplay();
     } catch (e) {
         calcDisplay = 'Error';
-        calcLastOperator = null;
-        calcOperand = null;
+        lastOperator = null;
         shouldResetDisplay = true;
         updateCalcDisplay();
         setTimeout(() => calcClear(), 1500);
@@ -461,12 +430,7 @@ function calcEquals() {
 }
 
 // ============= INITIALIZE =============
-function loadCalculatorState() {
-    calcClear();
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-    loadCalculatorState();
     updateUnits();
     updateMiscUnits();
 });
