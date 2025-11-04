@@ -399,6 +399,10 @@
             <div class="settings-section">
                 <h3>⚙️ Advanced</h3>
                 <div class="settings-group">
+                    <button onclick="saveSettingsManual()" class="btn-primary">💾 Save Settings</button>
+                    <span class="settings-label-text">Apply all changes</span>
+                </div>
+                <div class="settings-group">
                     <button onclick="resetSettings()" class="btn-danger">⚡ Reset All Settings</button>
                     <span class="settings-label-text">Restore factory defaults (cannot be undone)</span>
                 </div>
@@ -440,3 +444,4 @@
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
+``` 

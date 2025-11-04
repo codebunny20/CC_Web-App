@@ -54,8 +54,6 @@ function markSettingsChanged() {
 }
 
 function saveAllSettings() {
-    if (!settingsChanged) return;
-    
     localStorage.setItem('theme', document.getElementById('themeSetting').value);
     localStorage.setItem('defaultCategory', document.getElementById('defaultCategory').value);
     localStorage.setItem('decimalPlaces', document.getElementById('decimalPlaces').value);
@@ -64,6 +62,12 @@ function saveAllSettings() {
     localStorage.setItem('gridLines', document.getElementById('gridLines').checked);
     
     settingsChanged = false;
+}
+
+function saveSettingsManual() {
+    saveAllSettings();
+    applyTheme();
+    alert('Settings saved successfully!');
 }
 
 function loadAllSettings() {
@@ -94,7 +98,6 @@ function setupSettingsListeners() {
         if (element) {
             element.addEventListener('change', () => {
                 markSettingsChanged();
-                saveAllSettings();
             });
         }
     });
