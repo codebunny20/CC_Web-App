@@ -351,6 +351,8 @@ let calcDisplay = '0';
 let calcMemory = 0;
 let calcHistory = [];
 let calcScientificMode = false;
+let lastOperator = null;
+let shouldResetDisplay = false;
 
 function loadCalculatorState() {
     const saved = localStorage.getItem('calcMemory');
@@ -381,18 +383,66 @@ function toggleScientificMode() {
 }
 
 function calcInput(val) {
-    if (val === '.') {
-        if (!calcDisplay.includes('.')) calcDisplay += val;
-    } else if (val === '(' || val === ')') {
-        calcDisplay += val;
-    } else if (val === '%') {
-        calcDisplay += val;
-    } else if (calcDisplay === '0' && val !== '.') {
-        calcDisplay = val;
-    } else {
-        calcDisplay += val;
+    // Handle number input
+    if (/^\d$/.test(val)) {
+        if (shouldResetDisplay) {
+            calcDisplay = val;
+            shouldResetDisplay = false;
+        } else {
+            if (calcDisplay === '0' && val !== '.') {
+                calcDisplay = val;
+            } else if (calcDisplay.length < 15) {
+                calcDisplay += val;
+            }
+        }
     }
-    document.getElementById('calcDisplay').textContent = calcDisplay;
+    // Handle decimal point
+    else if (val === '.') {
+        if (shouldResetDisplay) {
+            calcDisplay = '0.';
+            shouldResetDisplay = false;
+        } else if (!calcDisplay.includes('.')) {
+            calcDisplay += '.';
+        }
+    }
+    // Handle operators
+    else if (['+', '-', '*', '/', '%', '^'].includes(val)) {
+        if (!shouldResetDisplay && calcDisplay !== '0' && calcDisplay !== '') {
+            // Complete previous calculation if operator pressed
+            if (lastOperator && !shouldResetDisplay) {
+                calcEquals();
+            }
+        }
+        lastOperator = val;
+        shouldResetDisplay = true;
+    }
+    // Handle parentheses
+    else if (val === '(' || val === ')') {
+        if (shouldResetDisplay && val === '(') {
+            calcDisplay = val;
+            shouldResetDisplay = false;
+        } else {
+            calcDisplay += val;
+        }
+    }
+    // Handle backspace
+    else if (val === 'backspace') {
+        if (calcDisplay.length > 1) {
+            calcDisplay = calcDisplay.slice(0, -1);
+        } else {
+            calcDisplay = '0';
+        }
+        shouldResetDisplay = false;
+    }
+
+    updateCalcDisplay();
+}
+
+function updateCalcDisplay() {
+    const display = document.getElementById('calcDisplay');
+    if (display) {
+        display.textContent = calcDisplay;
+    }
 }
 
 function calcScientific(func) {
@@ -400,50 +450,145 @@ function calcScientific(func) {
     let result;
     
     try {
-        if (func === 'sin') result = Math.sin(eval(expr));
-        else if (func === 'cos') result = Math.cos(eval(expr));
-        else if (func === 'tan') result = Math.tan(eval(expr));
-        else if (func === 'asin') result = Math.asin(eval(expr));
-        else if (func === 'acos') result = Math.acos(eval(expr));
-        else if (func === 'atan') result = Math.atan(eval(expr));
-        else if (func === 'log') result = Math.log10(eval(expr));
-        else if (func === 'ln') result = Math.log(eval(expr));
-        else if (func === 'sqrt') result = Math.sqrt(eval(expr));
-        else if (func === 'pi') calcInput('3.14159265359');
-        else if (func === 'e') calcInput('2.71828182846');
+        switch(func) {
+            case 'sin':
+                result = Math.sin(parseExpression(expr));
+                break;
+            case 'cos':
+                result = Math.cos(parseExpression(expr));
+                break;
+            case 'tan':
+                result = Math.tan(parseExpression(expr));
+                break;
+            case 'asin':
+                const asinVal = parseExpression(expr);
+                if (asinVal < -1 || asinVal > 1) throw new Error('asin domain error');
+                result = Math.asin(asinVal);
+                break;
+            case 'acos':
+                const acosVal = parseExpression(expr);
+                if (acosVal < -1 || acosVal > 1) throw new Error('acos domain error');
+                result = Math.acos(acosVal);
+                break;
+            case 'atan':
+                result = Math.atan(parseExpression(expr));
+                break;
+            case 'log':
+                const logVal = parseExpression(expr);
+                if (logVal <= 0) throw new Error('log domain error');
+                result = Math.log10(logVal);
+                break;
+            case 'ln':
+                const lnVal = parseExpression(expr);
+                if (lnVal <= 0) throw new Error('ln domain error');
+                result = Math.log(lnVal);
+                break;
+            case 'sqrt':
+                const sqrtVal = parseExpression(expr);
+                if (sqrtVal < 0) throw new Error('sqrt of negative number');
+                result = Math.sqrt(sqrtVal);
+                break;
+            case 'pi':
+                calcDisplay = (calcDisplay === '0') ? String(Math.PI) : calcDisplay + Math.PI;
+                shouldResetDisplay = true;
+                updateCalcDisplay();
+                return;
+            case 'e':
+                calcDisplay = (calcDisplay === '0') ? String(Math.E) : calcDisplay + Math.E;
+                shouldResetDisplay = true;
+                updateCalcDisplay();
+                return;
+        }
         
         if (result !== undefined) {
             addToHistory(expr, result);
-            calcDisplay = String(result.toFixed(8)).replace(/\.?0+$/, '');
-            document.getElementById('calcDisplay').textContent = calcDisplay;
+            calcDisplay = formatResult(result);
+            shouldResetDisplay = true;
+            lastOperator = null;
+            updateCalcDisplay();
         }
     } catch (e) {
-        calcDisplay = 'Error';
-        document.getElementById('calcDisplay').textContent = calcDisplay;
-        setTimeout(() => calcClear(), 1000);
+        calcDisplay = 'Error: ' + e.message;
+        lastOperator = null;
+        shouldResetDisplay = true;
+        updateCalcDisplay();
+        setTimeout(() => calcClear(), 2000);
     }
+}
+
+function parseExpression(expr) {
+    // Replace ^ with ** for power
+    expr = expr.replace(/\^/g, '**');
+    // Use Function constructor for safer evaluation
+    try {
+        const result = Function('"use strict"; return (' + expr + ')')();
+        return result;
+    } catch (e) {
+        throw new Error('Invalid expression');
+    }
+}
+
+function formatResult(result) {
+    if (!isFinite(result)) {
+        throw new Error('Invalid result');
+    }
+    
+    // Format with appropriate decimal places
+    if (Math.abs(result) >= 1e10 || (Math.abs(result) < 1e-6 && result !== 0)) {
+        return result.toExponential(6);
+    }
+    
+    const rounded = Math.round(result * 1e10) / 1e10;
+    const str = rounded.toString();
+    
+    // Limit display length
+    if (str.length > 15) {
+        return rounded.toFixed(8).replace(/\.?0+$/, '');
+    }
+    return str;
 }
 
 function calcClear() {
     calcDisplay = '0';
-    document.getElementById('calcDisplay').textContent = calcDisplay;
+    lastOperator = null;
+    shouldResetDisplay = false;
+    updateCalcDisplay();
 }
 
 function calcEquals() {
     try {
         const expr = calcDisplay.replace(/\^/g, '**');
-        const result = eval(expr);
+        
+        // Validate expression
+        if (!expr || expr === '0' || expr === '.' || /[+\-*/%^(]$/.test(expr)) {
+            return;
+        }
+        
+        const result = parseExpression(expr);
+        
+        if (!isFinite(result)) {
+            throw new Error('Invalid calculation');
+        }
+        
         addToHistory(calcDisplay, result);
-        calcDisplay = String(result);
-        document.getElementById('calcDisplay').textContent = calcDisplay;
-    } catch {
+        calcDisplay = formatResult(result);
+        lastOperator = null;
+        shouldResetDisplay = true;
+        updateCalcDisplay();
+    } catch (e) {
         calcDisplay = 'Error';
-        document.getElementById('calcDisplay').textContent = calcDisplay;
-        setTimeout(() => calcClear(), 1000);
+        lastOperator = null;
+        shouldResetDisplay = true;
+        updateCalcDisplay();
+        setTimeout(() => calcClear(), 1500);
     }
 }
 
 function addToHistory(expression, result) {
+    if (calcHistory.length >= 100) {
+        calcHistory.shift(); // Remove oldest item if history exceeds 100
+    }
+    
     calcHistory.push({
         expr: expression,
         result: result,
@@ -463,16 +608,20 @@ function renderHistory() {
     }
     
     tape.innerHTML = calcHistory.map((item, idx) => `
-        <div class="history-item" onclick="recallFromHistory(${idx})">
+        <div class="history-item" onclick="recallFromHistory(${idx})" style="cursor: pointer; padding: 0.5rem; border-radius: 6px; transition: background 0.2s;" onmouseover="this.style.background='rgba(96, 165, 250, 0.1)'" onmouseout="this.style.background='transparent'">
             <div class="history-item-expr">${item.expr}</div>
-            <div class="history-item-result">= ${String(item.result).substring(0, 15)}</div>
+            <div class="history-item-result">= ${formatResult(item.result)}</div>
         </div>
     `).join('');
 }
 
 function recallFromHistory(idx) {
-    calcDisplay = String(calcHistory[idx].result);
-    document.getElementById('calcDisplay').textContent = calcDisplay;
+    if (idx >= 0 && idx < calcHistory.length) {
+        calcDisplay = formatResult(calcHistory[idx].result);
+        lastOperator = null;
+        shouldResetDisplay = true;
+        updateCalcDisplay();
+    }
 }
 
 function clearHistory() {
@@ -488,37 +637,43 @@ function updateMemoryDisplay() {
     const memDisplay = document.getElementById('calcMemDisplay');
     if (!memDisplay) return;
     
-    const display = calcMemory === 0 ? 'M: 0' : `M: ${calcMemory.toFixed(6).replace(/\.?0+$/, '')}`;
+    const display = calcMemory === 0 ? 'M: 0' : `M: ${formatResult(calcMemory)}`;
     memDisplay.textContent = display;
 }
 
 function calcMemoryAdd() {
     try {
-        const expr = calcDisplay.replace(/\^/g, '**');
-        const val = eval(expr);
+        const val = parseExpression(calcDisplay);
         calcMemory += val;
         updateMemoryDisplay();
         saveCalculatorState();
     } catch (e) {
-        alert('Invalid calculation');
+        calcDisplay = 'Error';
+        shouldResetDisplay = true;
+        updateCalcDisplay();
+        setTimeout(() => calcClear(), 1500);
     }
 }
 
 function calcMemorySubtract() {
     try {
-        const expr = calcDisplay.replace(/\^/g, '**');
-        const val = eval(expr);
+        const val = parseExpression(calcDisplay);
         calcMemory -= val;
         updateMemoryDisplay();
         saveCalculatorState();
     } catch (e) {
-        alert('Invalid calculation');
+        calcDisplay = 'Error';
+        shouldResetDisplay = true;
+        updateCalcDisplay();
+        setTimeout(() => calcClear(), 1500);
     }
 }
 
 function calcMemoryRecall() {
-    calcDisplay = String(calcMemory);
-    document.getElementById('calcDisplay').textContent = calcDisplay;
+    calcDisplay = formatResult(calcMemory);
+    lastOperator = null;
+    shouldResetDisplay = true;
+    updateCalcDisplay();
 }
 
 function calcMemoryClear() {
