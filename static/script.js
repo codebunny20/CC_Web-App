@@ -482,6 +482,212 @@ function calcEquals() {
     }
 }
 
+// ============= GRAPHING CALCULATOR =============
+let graphState = null;
+
+function toggleAutoY() {
+    const autoY = document.getElementById('graphAutoY').checked;
+    document.getElementById('graphYmin').disabled = autoY;
+    document.getElementById('graphYmax').disabled = autoY;
+}
+
+function graphPlot() {
+    const expr = document.getElementById('graphExpr').value;
+    const xmin = parseFloat(document.getElementById('graphXmin').value);
+    const xmax = parseFloat(document.getElementById('graphXmax').value);
+    const autoY = document.getElementById('graphAutoY').checked;
+    const ymin = parseFloat(document.getElementById('graphYmin').value);
+    const ymax = parseFloat(document.getElementById('graphYmax').value);
+    const msgDiv = document.getElementById('graphMsg');
+    
+    if (!expr || isNaN(xmin) || isNaN(xmax)) {
+        msgDiv.textContent = 'Invalid input values';
+        msgDiv.style.color = 'var(--error)';
+        return;
+    }
+    
+    if (xmin >= xmax) {
+        msgDiv.textContent = 'X min must be less than X max';
+        msgDiv.style.color = 'var(--error)';
+        return;
+    }
+    
+    msgDiv.textContent = 'Plotting...';
+    msgDiv.style.color = 'var(--text-dim)';
+    
+    const resolution = localStorage.getItem('graphResolution') || 'medium';
+    let samples = 600;
+    if (resolution === 'low') samples = 300;
+    if (resolution === 'high') samples = 1000;
+    
+    fetch('/api/graph-sample', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            expr: expr,
+            xmin: xmin,
+            xmax: xmax,
+            samples: samples
+        })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success && d.xs.length > 0) {
+            let computedYmin = Math.min(...d.ys);
+            let computedYmax = Math.max(...d.ys);
+            
+            if (computedYmin === computedYmax) {
+                computedYmin -= 1;
+                computedYmax += 1;
+            }
+            
+            const padding = (computedYmax - computedYmin) * 0.1;
+            computedYmin -= padding;
+            computedYmax += padding;
+            
+            graphState = {
+                xs: d.xs,
+                ys: d.ys,
+                xmin: xmin,
+                xmax: xmax,
+                ymin: autoY ? computedYmin : ymin,
+                ymax: autoY ? computedYmax : ymax,
+                expr: expr
+            };
+            
+            drawGraph();
+            msgDiv.textContent = '';
+        } else {
+            msgDiv.textContent = 'Error plotting graph: ' + (d.error || 'Unknown error');
+            msgDiv.style.color = 'var(--error)';
+            graphState = null;
+        }
+    })
+    .catch(err => {
+        msgDiv.textContent = 'Error: ' + err.message;
+        msgDiv.style.color = 'var(--error)';
+    });
+}
+
+function drawGraph() {
+    if (!graphState) return;
+    
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    
+    const padding = 50;
+    const width = canvas.width - 2 * padding;
+    const height = canvas.height - 2 * padding;
+    
+    const { xs, ys, xmin, xmax, ymin, ymax } = graphState;
+    
+    // Background
+    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--bg-card').trim();
+    if (!ctx.fillStyle) ctx.fillStyle = 'rgba(30, 41, 59, 0.7)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw grid
+    if (document.getElementById('gridLines').checked) {
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.1)';
+        ctx.lineWidth = 1;
+        
+        // Vertical grid lines
+        for (let i = 0; i <= 10; i++) {
+            const x = padding + (i / 10) * width;
+            ctx.beginPath();
+            ctx.moveTo(x, padding);
+            ctx.lineTo(x, canvas.height - padding);
+            ctx.stroke();
+        }
+        
+        // Horizontal grid lines
+        for (let i = 0; i <= 10; i++) {
+            const y = padding + (i / 10) * height;
+            ctx.beginPath();
+            ctx.moveTo(padding, y);
+            ctx.lineTo(canvas.width - padding, y);
+            ctx.stroke();
+        }
+    }
+    
+    // Axes
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padding, canvas.height - padding);
+    ctx.lineTo(canvas.width - padding, canvas.height - padding);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(padding, padding);
+    ctx.lineTo(padding, canvas.height - padding);
+    ctx.stroke();
+    
+    // Axis labels
+    ctx.fillStyle = 'rgba(203, 213, 225, 0.8)';
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    
+    // X-axis labels
+    for (let i = 0; i <= 5; i++) {
+        const x = padding + (i / 5) * width;
+        const value = xmin + (i / 5) * (xmax - xmin);
+        ctx.fillText(value.toFixed(1), x, canvas.height - padding + 15);
+    }
+    
+    // Y-axis labels
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let i = 0; i <= 5; i++) {
+        const y = canvas.height - padding - (i / 5) * height;
+        const value = ymin + (i / 5) * (ymax - ymin);
+        ctx.fillText(value.toFixed(1), padding - 10, y);
+    }
+    
+    // Plot curve
+    ctx.strokeStyle = 'rgba(96, 165, 250, 1)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    
+    let first = true;
+    for (let i = 0; i < xs.length; i++) {
+        const x = padding + ((xs[i] - xmin) / (xmax - xmin)) * width;
+        const y = canvas.height - padding - ((ys[i] - ymin) / (ymax - ymin)) * height;
+        
+        if (first) {
+            ctx.moveTo(x, y);
+            first = false;
+        } else {
+            ctx.lineTo(x, y);
+        }
+    }
+    ctx.stroke();
+    
+    // Plot points
+    ctx.fillStyle = 'rgba(167, 139, 250, 0.6)';
+    for (let i = 0; i < xs.length; i += Math.max(1, Math.floor(xs.length / 50))) {
+        const x = padding + ((xs[i] - xmin) / (xmax - xmin)) * width;
+        const y = canvas.height - padding - ((ys[i] - ymin) / (ymax - ymin)) * height;
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function graphClear() {
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--bg-card').trim();
+    if (!ctx.fillStyle) ctx.fillStyle = 'rgba(30, 41, 59, 0.7)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    graphState = null;
+    document.getElementById('graphMsg').textContent = '';
+}
+
 // ============= INITIALIZE =============
 function loadCalculatorState() {
     calcClear();

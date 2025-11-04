@@ -315,29 +315,40 @@ def api_graph_sample():
     xmax = float(data.get('xmax', 10))
     samples = int(data.get('samples', 600))
     
+    if samples > 2000:
+        samples = 2000
+    if samples < 100:
+        samples = 100
+    
     env = {
         "pi": math.pi, "e": math.e,
         "sin": math.sin, "cos": math.cos, "tan": math.tan,
         "asin": math.asin, "acos": math.acos, "atan": math.atan,
-        "exp": math.exp, "log": math.log, "log10": math.log10,
+        "sinh": math.sinh, "cosh": math.cosh, "tanh": math.tanh,
+        "exp": math.exp, "log": math.log, "log10": math.log10, "log2": math.log2,
         "sqrt": math.sqrt, "abs": abs, "floor": math.floor, "ceil": math.ceil,
-        "pow": pow
+        "pow": pow, "fabs": math.fabs
     }
     
     xs, ys = [], []
     dx = (xmax - xmin) / max(1, samples - 1)
     
-    for i in range(samples):
-        x = xmin + i * dx
-        env["x"] = x
-        try:
-            safe_expr = expr.replace('^', '**')
+    try:
+        for i in range(samples):
+            x = xmin + i * dx
+            env["x"] = x
+            
+            safe_expr = expr.replace('^', '**').strip()
             y = float(eval(safe_expr, {"__builtins__": {}}, env))
+            
             if math.isfinite(y):
-                xs.append(x)
-                ys.append(y)
-        except:
-            pass
+                xs.append(round(x, 8))
+                ys.append(round(y, 8))
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Expression error: {str(e)}"}), 400
+    
+    if not xs:
+        return jsonify({"success": False, "error": "No valid points to plot"}), 400
     
     return jsonify({"success": True, "xs": xs, "ys": ys})
 
