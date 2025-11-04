@@ -116,10 +116,17 @@ function applyTheme() {
 function resetSettings() {
     if (confirm('Reset all settings to default? This cannot be undone.')) {
         localStorage.clear();
+        
+        // Reset all form elements to defaults
         document.getElementById('themeSetting').value = 'dark';
-        loadAllSettings();
+        document.getElementById('defaultCategory').value = 'Length';
+        document.getElementById('decimalPlaces').value = '4';
+        document.getElementById('enterToConvert').checked = true;
+        document.getElementById('graphResolution').value = 'medium';
+        document.getElementById('gridLines').checked = true;
+        
+        // Apply default theme
         applyTheme();
-        location.reload();
     }
 }
 
