@@ -125,6 +125,8 @@ function resetSettings() {
         document.getElementById('graphResolution').value = 'medium';
         document.getElementById('gridLines').checked = true;
         
+        settingsChanged = false;
+        
         // Apply default theme
         applyTheme();
     }
@@ -495,11 +497,13 @@ function loadConverterPreferences() {
 }
 
 function loadMiscConverterPreferences() {
-    const defaultCategory = localStorage.getItem('defaultCategory') || 'Length';
+    const defaultCategory = localStorage.getItem('defaultCategory') || 'Angle';
     const miscCategory = document.getElementById('miscCategory');
     // Only set if the category exists in misc conversions
     if (['Angle', 'Sound Intensity', 'Power', 'Pressure', 'Data', 'Frequency'].includes(defaultCategory)) {
         miscCategory.value = defaultCategory;
+    } else {
+        miscCategory.value = 'Angle';
     }
 }
 
