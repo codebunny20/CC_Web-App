@@ -29,11 +29,13 @@ function showPage(pageId) {
 function goToHome() { showPage('homePage'); }
 function goToConverter() { 
     showPage('converterPage');
+    loadConverterPreferences();
     updateUnits();
 }
 function goToCalculator() { showPage('calculatorPage'); }
 function goToMiscConverter() { 
     showPage('miscPage');
+    loadMiscConverterPreferences();
     updateMiscUnits();
 }
 function goToGraphing() { showPage('graphingPage'); }
@@ -251,6 +253,7 @@ function convertUnits() {
     const category = document.getElementById('category').value;
     const fromUnit = document.getElementById('fromUnit').value;
     const value = parseFloat(document.getElementById('inputValue').value);
+    const decimalPlaces = parseInt(localStorage.getItem('decimalPlaces')) || 4;
 
     if (isNaN(value)) {
         alert('Enter a valid number');
@@ -267,7 +270,7 @@ function convertUnits() {
         const results = document.getElementById('conversionResults');
         results.innerHTML = Object.entries(data)
             .map(([unit, factor]) => {
-                const result = (baseValue * factor).toFixed(6).replace(/\.?0+$/, '');
+                const result = (baseValue * factor).toFixed(decimalPlaces).replace(/\.?0+$/, '');
                 return `<div class="result-item"><span class="unit">${unit}</span><span class="value">${result}</span></div>`;
             })
             .join('');
@@ -280,6 +283,8 @@ function convertTemperature(value, fromUnit) {
     else if (fromUnit === 'Fahrenheit') celsius = (value - 32) * 5/9;
     else if (fromUnit === 'Kelvin') celsius = value - 273.15;
 
+    const decimalPlaces = parseInt(localStorage.getItem('decimalPlaces')) || 4;
+
     const results = {
         'Celsius': celsius,
         'Fahrenheit': celsius * 9/5 + 32,
@@ -287,7 +292,7 @@ function convertTemperature(value, fromUnit) {
     };
 
     const html = Object.entries(results)
-        .map(([unit, val]) => `<div class="result-item"><span class="unit">${unit}</span><span class="value">${val.toFixed(2)}</span></div>`)
+        .map(([unit, val]) => `<div class="result-item"><span class="unit">${unit}</span><span class="value">${val.toFixed(decimalPlaces)}</span></div>`)
         .join('');
     document.getElementById('conversionResults').innerHTML = html;
 }
@@ -304,6 +309,7 @@ function convertMisc() {
     const category = document.getElementById('miscCategory').value;
     const fromUnit = document.getElementById('miscFromUnit').value;
     const value = parseFloat(document.getElementById('miscInputValue').value);
+    const decimalPlaces = parseInt(localStorage.getItem('decimalPlaces')) || 4;
 
     if (isNaN(value)) {
         alert('Enter a valid number');
@@ -314,28 +320,28 @@ function convertMisc() {
     const fromFactor = data[fromUnit];
 
     if (typeof fromFactor === 'string') {
-        convertSpecialMisc(value, category, fromUnit);
+        convertSpecialMisc(value, category, fromUnit, decimalPlaces);
     } else {
         const baseValue = value / fromFactor;
         const results = document.getElementById('miscResults');
         results.innerHTML = Object.entries(data)
             .map(([unit, factor]) => {
                 if (typeof factor === 'string') return '';
-                const result = (baseValue * factor).toFixed(6).replace(/\.?0+$/, '');
+                const result = (baseValue * factor).toFixed(decimalPlaces).replace(/\.?0+$/, '');
                 return `<div class="result-item"><span class="unit">${unit}</span><span class="value">${result}</span></div>`;
             })
             .join('');
     }
 }
 
-function convertSpecialMisc(value, category, fromUnit) {
+function convertSpecialMisc(value, category, fromUnit, decimalPlaces) {
     const results = document.getElementById('miscResults');
     if (category === 'Sound Intensity') {
         const watt = fromUnit === 'Decibel (W/m²)' ? Math.pow(10, value/10) * 1e-12 : value;
         const db = fromUnit === 'Watt/m²' ? 10 * Math.log10(value / 1e-12) : value;
         results.innerHTML = `
-            <div class="result-item"><span class="unit">Decibel (W/m²)</span><span class="value">${db.toFixed(2)}</span></div>
-            <div class="result-item"><span class="unit">Watt/m²</span><span class="value">${watt.toFixed(6)}</span></div>
+            <div class="result-item"><span class="unit">Decibel (W/m²)</span><span class="value">${db.toFixed(decimalPlaces)}</span></div>
+            <div class="result-item"><span class="unit">Watt/m²</span><span class="value">${watt.toFixed(decimalPlaces)}</span></div>
         `;
     }
 }
@@ -1040,3 +1046,18 @@ document.addEventListener('DOMContentLoaded', () => {
     updateMiscUnits();
     toggleAutoY();
 });
+
+function loadConverterPreferences() {
+    const defaultCategory = localStorage.getItem('defaultCategory') || 'Length';
+    const categorySelect = document.getElementById('category');
+    categorySelect.value = defaultCategory;
+}
+
+function loadMiscConverterPreferences() {
+    const defaultCategory = localStorage.getItem('defaultCategory') || 'Length';
+    const miscCategory = document.getElementById('miscCategory');
+    // Only set if the category exists in misc conversions
+    if (['Angle', 'Sound Intensity', 'Power', 'Pressure', 'Data', 'Frequency'].includes(defaultCategory)) {
+        miscCategory.value = defaultCategory;
+    }
+}
