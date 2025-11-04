@@ -363,7 +363,7 @@ function updateCalcOperation() {
                        : calcLastOperator === '-' ? '-'
                        : calcLastOperator === '*' ? '×'
                        : '÷';
-        operationDisplay.textContent = `${calcOperand} ${opSymbol} ${calcDisplay}`;
+        operationDisplay.textContent = `${calcOperand} ${opSymbol}`;
     }
 }
 
@@ -407,7 +407,7 @@ function calcInput(val) {
 function updateCalcDisplay() {
     const display = document.getElementById('calcDisplay');
     if (display) {
-        display.textContent = calcDisplay;
+        display.textContent = calcDisplay.length > 20 ? calcDisplay.slice(0, 20) : calcDisplay;
     }
 }
 
@@ -483,6 +483,7 @@ function calcEquals() {
 // ============= INITIALIZE =============
 function loadCalculatorState() {
     calcClear();
+    updateCalcDisplay();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
