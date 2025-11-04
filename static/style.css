@@ -417,6 +417,21 @@ body.light-theme {
     color: var(--primary-light);
 }
 
+.calc-operation {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(96, 165, 250, 0.2);
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    text-align: right;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 1rem;
+    color: var(--text-dim);
+    min-height: 28px;
+    word-break: break-all;
+}
+
 .calc-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
