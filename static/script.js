@@ -44,6 +44,70 @@ function goToGameCalc() {
     updateGameRpmUnits();
 }
 
+// ============= SETTINGS STATE MANAGEMENT =============
+let settingsChanged = false;
+
+function markSettingsChanged() {
+    settingsChanged = true;
+}
+
+function saveAllSettings() {
+    if (!settingsChanged) return;
+    
+    localStorage.setItem('theme', document.getElementById('themeSetting').value);
+    localStorage.setItem('defaultCategory', document.getElementById('defaultCategory').value);
+    localStorage.setItem('decimalPlaces', document.getElementById('decimalPlaces').value);
+    localStorage.setItem('enterToConvert', document.getElementById('enterToConvert').checked);
+    localStorage.setItem('calcHistory', document.getElementById('calcHistory').checked);
+    localStorage.setItem('calcSound', document.getElementById('calcSound').checked);
+    localStorage.setItem('graphResolution', document.getElementById('graphResolution').value);
+    localStorage.setItem('gridLines', document.getElementById('gridLines').checked);
+    localStorage.setItem('saveHistory', document.getElementById('saveHistory').checked);
+    
+    settingsChanged = false;
+}
+
+function loadAllSettings() {
+    const theme = localStorage.getItem('theme') || 'dark';
+    const defaultCategory = localStorage.getItem('defaultCategory') || 'Length';
+    const decimalPlaces = localStorage.getItem('decimalPlaces') || '4';
+    const enterToConvert = localStorage.getItem('enterToConvert') !== 'false';
+    const calcHistory = localStorage.getItem('calcHistory') !== 'false';
+    const calcSound = localStorage.getItem('calcSound') !== 'false';
+    const graphResolution = localStorage.getItem('graphResolution') || 'medium';
+    const gridLines = localStorage.getItem('gridLines') !== 'false';
+    const saveHistory = localStorage.getItem('saveHistory') !== 'false';
+
+    document.getElementById('themeSetting').value = theme;
+    document.getElementById('defaultCategory').value = defaultCategory;
+    document.getElementById('decimalPlaces').value = decimalPlaces;
+    document.getElementById('enterToConvert').checked = enterToConvert;
+    document.getElementById('calcHistory').checked = calcHistory;
+    document.getElementById('calcSound').checked = calcSound;
+    document.getElementById('graphResolution').value = graphResolution;
+    document.getElementById('gridLines').checked = gridLines;
+    document.getElementById('saveHistory').checked = saveHistory;
+}
+
+// ============= SETTINGS PAGE EVENT LISTENERS =============
+function setupSettingsListeners() {
+    const settingElements = [
+        'themeSetting', 'defaultCategory', 'decimalPlaces',
+        'enterToConvert', 'calcHistory', 'calcSound',
+        'graphResolution', 'gridLines', 'saveHistory'
+    ];
+
+    settingElements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('change', () => {
+                markSettingsChanged();
+                saveAllSettings();
+            });
+        }
+    });
+}
+
 // ============= SETTINGS =============
 function applyTheme() {
     const theme = document.getElementById('themeSetting').value;
@@ -53,22 +117,30 @@ function applyTheme() {
         document.body.classList.add('light-theme');
     }
     localStorage.setItem('theme', theme);
+    markSettingsChanged();
     if (graphState) drawGraph();
 }
 
 function resetSettings() {
-    if (confirm('Reset all settings to default?')) {
-        document.getElementById('themeSetting').value = 'dark';
+    if (confirm('Reset all settings to default? This cannot be undone.')) {
         localStorage.clear();
+        document.getElementById('themeSetting').value = 'dark';
+        loadAllSettings();
+        applyTheme();
         location.reload();
     }
 }
 
 window.addEventListener('load', () => {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    document.getElementById('themeSetting').value = savedTheme;
+    loadAllSettings();
     applyTheme();
+    setupSettingsListeners();
     loadCalculatorState();
+});
+
+// Save settings before leaving page
+window.addEventListener('beforeunload', () => {
+    saveAllSettings();
 });
 
 // ============= CONVERTER DATA =============
