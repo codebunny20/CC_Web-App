@@ -118,6 +118,7 @@ function applyTheme() {
 
 function resetSettings() {
     if (confirm('Reset all settings to default? This cannot be undone.')) {
+        // Clear all localStorage
         localStorage.clear();
         
         // Reset all form elements to defaults
@@ -128,10 +129,66 @@ function resetSettings() {
         document.getElementById('graphResolution').value = 'medium';
         document.getElementById('gridLines').checked = true;
         
+        // Reset calculator
+        calcClear();
+        
+        // Reset converter to default category
+        if (document.getElementById('category')) {
+            document.getElementById('category').value = 'Length';
+            updateUnits();
+        }
+        
+        // Reset misc converter to default category
+        if (document.getElementById('miscCategory')) {
+            document.getElementById('miscCategory').value = 'Angle';
+            updateMiscUnits();
+        }
+        
+        // Reset graphing inputs
+        if (document.getElementById('graphExpr')) {
+            document.getElementById('graphExpr').value = 'sin(x)';
+            document.getElementById('graphXmin').value = '-10';
+            document.getElementById('graphXmax').value = '10';
+            document.getElementById('graphAutoY').checked = true;
+            document.getElementById('graphYmin').value = '-5';
+            document.getElementById('graphYmax').value = '5';
+            document.getElementById('graphYmin').disabled = true;
+            document.getElementById('graphYmax').disabled = true;
+            graphClear();
+        }
+        
+        // Reset game calculator inputs to defaults
+        if (document.getElementById('gameRpmType')) {
+            document.getElementById('gameRpmType').value = 'RPM';
+            updateGameRpmUnits();
+            document.getElementById('gameRpmValue').value = '';
+            document.getElementById('reloadMagSize').value = '30';
+            document.getElementById('reloadTime').value = '2.5';
+            document.getElementById('reloadRPS').value = '10';
+            document.getElementById('weaponSwapReload1').value = '2.0';
+            document.getElementById('weaponSwapReload2').value = '2.5';
+            document.getElementById('weaponSwapTime').value = '0.7';
+            document.getElementById('dpsDamage').value = '50';
+            document.getElementById('dpsRPM').value = '600';
+            document.getElementById('dpsMagSize').value = '30';
+            document.getElementById('dpsReloadTime').value = '2.0';
+            document.getElementById('dpsAccuracy').value = '100';
+            document.getElementById('ttkHealth').value = '100';
+            document.getElementById('ttkDamage').value = '25';
+            document.getElementById('ttkRPM').value = '600';
+            document.getElementById('ttkHeadshotMult').value = '2.0';
+        }
+        
+        // Set flag to prevent auto-save
         settingsChanged = false;
         
         // Apply default theme
-        applyTheme();
+        document.body.classList.remove('light-theme');
+        
+        // Refresh graph if visible
+        if (graphState) drawGraph();
+        
+        alert('All settings have been reset to defaults!');
     }
 }
 
