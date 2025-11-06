@@ -133,26 +133,19 @@ function resetSettings() {
         calcClear();
         
         // Reset converter to default category
-        const categorySelect = document.getElementById('category');
-        if (categorySelect) {
-            categorySelect.value = 'Length';
+        if (document.getElementById('category')) {
+            document.getElementById('category').value = 'Length';
             updateUnits();
-            document.getElementById('inputValue').value = '';
-            document.getElementById('conversionResults').innerHTML = '';
         }
         
         // Reset misc converter to default category
-        const miscCategory = document.getElementById('miscCategory');
-        if (miscCategory) {
-            miscCategory.value = 'Angle';
+        if (document.getElementById('miscCategory')) {
+            document.getElementById('miscCategory').value = 'Angle';
             updateMiscUnits();
-            document.getElementById('miscInputValue').value = '';
-            document.getElementById('miscResults').innerHTML = '';
         }
         
         // Reset graphing inputs
-        const graphExpr = document.getElementById('graphExpr');
-        if (graphExpr) {
+        if (document.getElementById('graphExpr')) {
             document.getElementById('graphExpr').value = 'sin(x)';
             document.getElementById('graphXmin').value = '-10';
             document.getElementById('graphXmax').value = '10';
@@ -165,36 +158,25 @@ function resetSettings() {
         }
         
         // Reset game calculator inputs to defaults
-        const gameRpmType = document.getElementById('gameRpmType');
-        if (gameRpmType) {
+        if (document.getElementById('gameRpmType')) {
             document.getElementById('gameRpmType').value = 'RPM';
             updateGameRpmUnits();
             document.getElementById('gameRpmValue').value = '';
-            document.getElementById('gameRpmFromUnit').value = 'RPM (Revolutions/Min)';
-            document.getElementById('gameRpmResults').innerHTML = '';
-            
             document.getElementById('reloadMagSize').value = '30';
             document.getElementById('reloadTime').value = '2.5';
             document.getElementById('reloadRPS').value = '10';
-            document.getElementById('reloadResults').innerHTML = '';
-            
             document.getElementById('weaponSwapReload1').value = '2.0';
             document.getElementById('weaponSwapReload2').value = '2.5';
             document.getElementById('weaponSwapTime').value = '0.7';
-            document.getElementById('weaponSwapResults').innerHTML = '';
-            
             document.getElementById('dpsDamage').value = '50';
             document.getElementById('dpsRPM').value = '600';
             document.getElementById('dpsMagSize').value = '30';
             document.getElementById('dpsReloadTime').value = '2.0';
             document.getElementById('dpsAccuracy').value = '100';
-            document.getElementById('dpsResults').innerHTML = '';
-            
             document.getElementById('ttkHealth').value = '100';
             document.getElementById('ttkDamage').value = '25';
             document.getElementById('ttkRPM').value = '600';
             document.getElementById('ttkHeadshotMult').value = '2.0';
-            document.getElementById('ttkResults').innerHTML = '';
         }
         
         // Set flag to prevent auto-save
