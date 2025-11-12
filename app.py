@@ -299,9 +299,13 @@ def api_calculate():
     """Evaluate a mathematical expression."""
     data = request.json
     expr = data.get('expr', '')
+    mode = data.get('mode', 'default')
     try:
-        # Support ^ as power and ln as natural log
-        safe_expr = expr.replace('^', '**')
+        # Support ^ as power for default/scientific, but preserve XOR for programmer
+        if mode == 'programmer':
+            safe_expr = expr  # keep bitwise ^, <<, >>, ~ intact
+        else:
+            safe_expr = expr.replace('^', '**')
         safe_expr = safe_expr.replace('ln', 'log')
 
         # Safe math environment
@@ -316,7 +320,12 @@ def api_calculate():
         }
 
         result = eval(safe_expr, {"__builtins__": {}}, env)
-        return jsonify({"success": True, "result": format_number(result)})
+
+        if mode == 'programmer':
+            # Ensure integer string (no formatting, no scientific notation)
+            return jsonify({"success": True, "result": str(int(result))})
+        else:
+            return jsonify({"success": True, "result": format_number(result)})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
 

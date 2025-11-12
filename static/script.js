@@ -562,6 +562,200 @@ function sciEquals() {
     });
 }
 
+// ============= PROGRAMMER CALCULATOR =============
+let progBase = 10;
+let progCur = '';      // current number in current base as string
+let progExpr = '';     // expression string in decimal with bitwise ops
+let progResult = null; // last evaluated decimal string
+
+function progSetBase(base) {
+    progBase = base;
+    progRefresh();
+}
+
+function progIsValidDigit(ch) {
+    const d = ch.toUpperCase();
+    if (/[0-9]/.test(d)) return parseInt(d, 10) < progBase;
+    if (/[A-F]/.test(d)) return progBase === 16;
+    return false;
+}
+
+function progAppendDigit(d) {
+    const up = d.toUpperCase();
+    if (!progIsValidDigit(up)) return;
+    // avoid leading zeros noise
+    if (progCur === '0') progCur = '';
+    progCur += up;
+    progRefresh();
+}
+
+function progBackspace() {
+    if (!progCur) return;
+    progCur = progCur.slice(0, -1);
+    progRefresh();
+}
+
+function progClear() {
+    progCur = '';
+    progExpr = '';
+    progResult = null;
+    progRefresh();
+}
+
+function progAppendParen(p) {
+    // if there's a buffered number, push it first
+    if (progCur) {
+        progPushCurrentNumberToExpr();
+    }
+    progExpr += p;
+    progRefresh();
+}
+
+function progAppendOp(op) {
+    if (op === 'NOT') {
+        if (progCur) {
+            const dec = progCurToDecString();
+            progExpr += (progNeedsOpSeparator(progExpr) ? ' ' : '') + `~(${dec})`;
+            progCur = '';
+        } else {
+            // unary NOT operator placed, next number will follow
+            progExpr += (progNeedsOpSeparator(progExpr) ? ' ' : '') + '~';
+        }
+    } else {
+        if (progCur) {
+            progPushCurrentNumberToExpr();
+        }
+        const mapped = op; // &, |, ^, <<, >>, +, -, *, /
+        progExpr += (progNeedsOpSeparator(progExpr) ? ' ' : '') + mapped + ' ';
+    }
+    progRefresh();
+}
+
+function progEvaluate() {
+    if (progCur) progPushCurrentNumberToExpr();
+    const expr = progExpr.trim();
+    if (!expr) return;
+    fetch('/api/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expr, mode: 'programmer' })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            progResult = d.result; // decimal string
+            progCur = '';          // keep buffer empty
+            progExpr = '';         // start fresh with result shown
+            progRefresh();
+        } else {
+            progShowError();
+        }
+    })
+    .catch(progShowError);
+}
+
+function progShowError() {
+    const disp = document.getElementById('progDisplay');
+    if (disp) disp.textContent = 'Error';
+    setTimeout(() => progRefresh(), 1200);
+}
+
+function progNeedsOpSeparator(expr) {
+    if (!expr) return false;
+    const last = expr.trim().slice(-1);
+    return last && !' ('.includes(last);
+}
+
+function progPushCurrentNumberToExpr() {
+    const dec = progCurToDecString();
+    progExpr += (progNeedsOpSeparator(progExpr) ? '' : '') + dec;
+    progCur = '';
+}
+
+function progCurToDecString() {
+    if (!progCur) return '0';
+    const negative = progCur.startsWith('-');
+    const str = negative ? progCur.slice(1) : progCur;
+    const decBig = bigIntFromBase(str, progBase);
+    return (negative ? '-' : '') + decBig.toString();
+}
+
+function bigIntFromBase(str, base) {
+    const map = ch => {
+        const c = ch.toUpperCase();
+        if (c >= '0' && c <= '9') return BigInt(c.charCodeAt(0) - 48);
+        return BigInt(10 + (c.charCodeAt(0) - 65));
+    };
+    let n = 0n;
+    const b = BigInt(base);
+    for (const ch of str) {
+        n = n * b + map(ch);
+    }
+    return n;
+}
+
+function bigIntToBaseString(n, base) {
+    const digits = '0123456789ABCDEF';
+    if (n === 0n) return '0';
+    const b = BigInt(base);
+    const neg = n < 0n;
+    let x = neg ? -n : n;
+    let out = '';
+    while (x > 0n) {
+        const rem = x % b;
+        out = digits[Number(rem)] + out;
+        x = x / b;
+    }
+    return neg ? '-' + out : out;
+}
+
+function progGetActiveValueAsBigInt() {
+    if (progCur) {
+        const dec = progCurToDecString();
+        try { return BigInt(dec); } catch { return 0n; }
+    }
+    if (progResult !== null) {
+        try { return BigInt(progResult); } catch { return 0n; }
+    }
+    return 0n;
+}
+
+function progRefresh() {
+    // Operation line
+    const opEl = document.getElementById('progOperation');
+    if (opEl) opEl.textContent = progExpr || '';
+
+    // Main display shows current value in current base
+    const disp = document.getElementById('progDisplay');
+    const activeVal = progGetActiveValueAsBigInt();
+    const shown = progCur
+        ? progCur
+        : bigIntToBaseString(activeVal, progBase);
+    if (disp) disp.textContent = shown;
+
+    // Base selector sync
+    const baseSel = document.getElementById('progBase');
+    if (baseSel) baseSel.value = String(progBase);
+
+    // Conversions
+    const decEl = document.getElementById('progDec');
+    const hexEl = document.getElementById('progHex');
+    const octEl = document.getElementById('progOct');
+    const binEl = document.getElementById('progBin');
+    const n = activeVal;
+    if (decEl) decEl.textContent = n.toString();
+    if (hexEl) hexEl.textContent = '0x' + bigIntToBaseString(n, 16);
+    if (octEl) octEl.textContent = '0o' + bigIntToBaseString(n, 8);
+    if (binEl) binEl.textContent = '0b' + bigIntToBaseString(n, 2);
+
+    // Enable/disable A-F based on base
+    const hexKeys = ['progA','progB','progC','progD','progE','progF'];
+    hexKeys.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.disabled = progBase !== 16;
+    });
+}
+
 // ============= GRAPHING CALCULATOR =============
 let graphState = null;
 
@@ -779,6 +973,8 @@ document.addEventListener('DOMContentLoaded', () => {
     updateMiscUnits();
     // Initialize scientific calculator
     sciClear();
+    // Initialize programmer calculator
+    progRefresh();
 });
 
 function loadConverterPreferences() {

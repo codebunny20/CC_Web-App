@@ -195,11 +195,74 @@
                 </div>
             </div>
 
-            <!-- Programmer Calculator (placeholder, non-breaking) -->
+            <!-- Programmer Calculator (fully functional) -->
             <div id="programmerCalcSection" class="calc-mode" style="display: none;">
                 <div class="calculator-panel">
-                    <div class="calc-operation">Programmer Mode</div>
-                    <div class="calc-display" id="progDisplay">Coming soon</div>
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label for="progBase">Base:</label>
+                        <select id="progBase" onchange="progSetBase(parseInt(this.value,10))">
+                            <option value="2">BIN (2)</option>
+                            <option value="8">OCT (8)</option>
+                            <option value="10" selected>DEC (10)</option>
+                            <option value="16">HEX (16)</option>
+                        </select>
+                    </div>
+
+                    <div class="calc-operation" id="progOperation"></div>
+                    <div class="calc-display" id="progDisplay">0</div>
+
+                    <div class="results-grid" style="margin: 0 0 1rem 0;">
+                        <div class="result-item"><span class="unit">DEC</span><span class="value" id="progDec">0</span></div>
+                        <div class="result-item"><span class="unit">HEX</span><span class="value" id="progHex">0x0</span></div>
+                        <div class="result-item"><span class="unit">OCT</span><span class="value" id="progOct">0o0</span></div>
+                        <div class="result-item"><span class="unit">BIN</span><span class="value" id="progBin">0b0</span></div>
+                    </div>
+
+                    <div class="calc-grid sci-grid">
+                        <!-- Hex digits -->
+                        <button id="progA" onclick="progAppendDigit('A')">A</button>
+                        <button id="progB" onclick="progAppendDigit('B')">B</button>
+                        <button id="progC" onclick="progAppendDigit('C')">C</button>
+                        <button onclick="progAppendOp('NOT')">~</button>
+
+                        <button id="progD" onclick="progAppendDigit('D')">D</button>
+                        <button id="progE" onclick="progAppendDigit('E')">E</button>
+                        <button id="progF" onclick="progAppendDigit('F')">F</button>
+                        <button onclick="progAppendOp('&')">&amp;</button>
+
+                        <!-- Operators -->
+                        <button onclick="progAppendOp('|')">|</button>
+                        <button onclick="progAppendOp('^')">XOR</button>
+                        <button onclick="progAppendOp('<<')">«</button>
+                        <button onclick="progAppendOp('>>')">»</button>
+
+                        <!-- Parens and controls -->
+                        <button onclick="progAppendParen('(')">(</button>
+                        <button onclick="progAppendParen(')')">)</button>
+                        <button onclick="progBackspace()">DEL</button>
+                        <button onclick="progClear()" class="clear">C</button>
+
+                        <!-- Digits and math ops -->
+                        <button onclick="progAppendDigit('7')">7</button>
+                        <button onclick="progAppendDigit('8')">8</button>
+                        <button onclick="progAppendDigit('9')">9</button>
+                        <button onclick="progAppendOp('/')">÷</button>
+
+                        <button onclick="progAppendDigit('4')">4</button>
+                        <button onclick="progAppendDigit('5')">5</button>
+                        <button onclick="progAppendDigit('6')">6</button>
+                        <button onclick="progAppendOp('*')">×</button>
+
+                        <button onclick="progAppendDigit('1')">1</button>
+                        <button onclick="progAppendDigit('2')">2</button>
+                        <button onclick="progAppendDigit('3')">3</button>
+                        <button onclick="progAppendOp('-')">-</button>
+
+                        <button onclick="progAppendDigit('0')" style="grid-column: span 3;">0</button>
+                        <button onclick="progAppendOp('+')">+</button>
+
+                        <button onclick="progEvaluate()" class="equals" style="grid-column: span 4;">=</button>
+                    </div>
                 </div>
             </div>
 
@@ -214,7 +277,7 @@
 
         <!-- MISC CONVERTER PAGE -->
         <div id="miscPage" class="page">
-            <div class="page-header">
+            <div class="page-header"></div>
                 <h2>Misc Converter</h2>
                 <p>Advanced conversions: Angle, Sound, Power, Pressure, Data, Frequency.</p>
             </div>
@@ -279,7 +342,7 @@
             </div>
 
             <!-- Reload Time Calculator -->
-            <div class="settings-group">
+            <div class="settings-group"></div>
                 <h3>⏱️ Reload Time Calculator</h3>
                 <div class="form-group">
                     <label>Magazine Size:</label>
