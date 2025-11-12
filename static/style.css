@@ -506,8 +506,17 @@ body.light-theme {
 /* Scientific calculator grid */
 .sci-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 0.75rem;
+}
+.sci-grid button {
+    padding: 0.9rem;
+    font-size: 1rem;
+}
+
+/* widen only the scientific calculator panel */
+.sci-panel {
+    max-width: 520px;
 }
 
 /* Game Calculator */
