@@ -32,7 +32,10 @@ function goToConverter() {
     loadConverterPreferences();
     updateUnits();
 }
-function goToCalculator() { showPage('calculatorPage'); }
+function goToCalculator() { 
+    showPage('calculatorPage'); 
+    showCalcTab('basic'); 
+}
 function goToMiscConverter() { 
     showPage('miscPage');
     loadMiscConverterPreferences();
@@ -463,6 +466,99 @@ function calcEquals() {
     }
 }
 
+// ============= SCIENTIFIC CALCULATOR =============
+let sciExpr = '';
+let sciAns = null;
+
+function showCalcTab(tab) {
+    const basic = document.getElementById('basicCalcSection');
+    const sci = document.getElementById('scientificCalcSection');
+    const tabBasic = document.getElementById('tabBasic');
+    const tabSci = document.getElementById('tabScientific');
+
+    if (!basic || !sci) return;
+
+    if (tab === 'basic') {
+        basic.style.display = '';
+        sci.style.display = 'none';
+        if (tabBasic) tabBasic.classList.add('active');
+        if (tabSci) tabSci.classList.remove('active');
+    } else {
+        basic.style.display = 'none';
+        sci.style.display = '';
+        if (tabBasic) tabBasic.classList.remove('active');
+        if (tabSci) tabSci.classList.add('active');
+    }
+}
+
+function updateSciDisplays() {
+    const op = document.getElementById('sciOperation');
+    const disp = document.getElementById('sciDisplay');
+    if (op) op.textContent = sciExpr || '';
+    if (disp) disp.textContent = (sciAns !== null) ? String(sciAns) : (sciExpr || '0');
+}
+
+function sciClear() {
+    sciExpr = '';
+    sciAns = null;
+    updateSciDisplays();
+}
+
+function sciBackspace() {
+    if (!sciExpr) return;
+    // Remove last token or character
+    const funcs = ['sin(', 'cos(', 'tan(', 'asin(', 'acos(', 'atan(', 'sqrt(', 'log10(', 'log2(', 'log('];
+    for (const f of funcs) {
+        if (sciExpr.endsWith(f)) {
+            sciExpr = sciExpr.slice(0, -f.length);
+            updateSciDisplays();
+            return;
+        }
+    }
+    sciExpr = sciExpr.slice(0, -1);
+    updateSciDisplays();
+}
+
+function sciAppend(token) {
+    if (token === 'PI') token = 'pi';
+    if (token === 'E') token = 'e';
+    sciExpr += token;
+    sciAns = null;
+    updateSciDisplays();
+}
+
+function sciEquals() {
+    if (!sciExpr) return;
+    // Replace any accidental unicode multiplication or division signs if introduced
+    const expr = sciExpr
+        .replace(/×/g, '*')
+        .replace(/÷/g, '/');
+
+    fetch('/api/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expr })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            sciAns = d.result;
+            // Continue with result as next expression baseline
+            sciExpr = String(d.result);
+            updateSciDisplays();
+        } else {
+            sciAns = 'Error';
+            updateSciDisplays();
+            setTimeout(() => sciClear(), 1200);
+        }
+    })
+    .catch(() => {
+        sciAns = 'Error';
+        updateSciDisplays();
+        setTimeout(() => sciClear(), 1200);
+    });
+}
+
 // ============= GRAPHING CALCULATOR =============
 let graphState = null;
 
@@ -678,6 +774,8 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCalculatorState();
     updateUnits();
     updateMiscUnits();
+    // Initialize scientific calculator
+    sciClear();
 });
 
 function loadConverterPreferences() {

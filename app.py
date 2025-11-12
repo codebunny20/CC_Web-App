@@ -300,8 +300,22 @@ def api_calculate():
     data = request.json
     expr = data.get('expr', '')
     try:
-        expr = expr.replace('^', '**')
-        result = eval(expr, {"__builtins__": {}}, {})
+        # Support ^ as power and ln as natural log
+        safe_expr = expr.replace('^', '**')
+        safe_expr = safe_expr.replace('ln', 'log')
+
+        # Safe math environment
+        env = {
+            "pi": math.pi, "e": math.e,
+            "sin": math.sin, "cos": math.cos, "tan": math.tan,
+            "asin": math.asin, "acos": math.acos, "atan": math.atan,
+            "sinh": math.sinh, "cosh": math.cosh, "tanh": math.tanh,
+            "exp": math.exp, "log": math.log, "log10": math.log10, "log2": math.log2,
+            "sqrt": math.sqrt, "abs": abs, "floor": math.floor, "ceil": math.ceil,
+            "pow": pow, "fabs": math.fabs
+        }
+
+        result = eval(safe_expr, {"__builtins__": {}}, env)
         return jsonify({"success": True, "result": format_number(result)})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400

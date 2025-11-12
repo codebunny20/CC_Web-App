@@ -490,6 +490,26 @@ body.light-theme {
     box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
 }
 
+/* Tab switch inside calculator */
+.tab-switch {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.tab-switch .btn-secondary.active {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    color: #fff;
+    border: none;
+}
+
+/* Scientific calculator grid */
+.sci-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.75rem;
+}
+
 /* Game Calculator */
 .settings-section {
     margin-bottom: 2.5rem;

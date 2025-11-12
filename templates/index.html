@@ -103,33 +103,93 @@
         <div id="calculatorPage" class="page">
             <div class="page-header">
                 <h2>Calculator</h2>
-                <p>Basic calculator with arithmetic operations.</p>
+                <p>Basic and Scientific calculator.</p>
             </div>
 
-            <div class="calculator-panel">
-                <div class="calc-display" id="calcDisplay">0</div>
-                <div class="calc-grid">
-                    <button onclick="calcInput('7')">7</button>
-                    <button onclick="calcInput('8')">8</button>
-                    <button onclick="calcInput('9')">9</button>
-                    <button onclick="calcInput('/')" class="op">÷</button>
+            <div class="tab-switch">
+                <button id="tabBasic" class="btn-secondary active" onclick="showCalcTab('basic')">Basic</button>
+                <button id="tabScientific" class="btn-secondary" onclick="showCalcTab('scientific')">Scientific</button>
+            </div>
 
-                    <button onclick="calcInput('4')">4</button>
-                    <button onclick="calcInput('5')">5</button>
-                    <button onclick="calcInput('6')">6</button>
-                    <button onclick="calcInput('*')" class="op">×</button>
+            <!-- Basic Calculator -->
+            <div id="basicCalcSection">
+                <div class="calculator-panel">
+                    <div class="calc-display" id="calcDisplay">0</div>
+                    <div class="calc-grid">
+                        <button onclick="calcInput('7')">7</button>
+                        <button onclick="calcInput('8')">8</button>
+                        <button onclick="calcInput('9')">9</button>
+                        <button onclick="calcInput('/')" class="op">÷</button>
 
-                    <button onclick="calcInput('1')">1</button>
-                    <button onclick="calcInput('2')">2</button>
-                    <button onclick="calcInput('3')">3</button>
-                    <button onclick="calcInput('-')" class="op">-</button>
+                        <button onclick="calcInput('4')">4</button>
+                        <button onclick="calcInput('5')">5</button>
+                        <button onclick="calcInput('6')">6</button>
+                        <button onclick="calcInput('*')" class="op">×</button>
 
-                    <button onclick="calcClear()" class="clear">C</button>
-                    <button onclick="calcInput('0')">0</button>
-                    <button onclick="calcInput('.')">/.</button>
-                    <button onclick="calcInput('+')" class="op">+</button>
+                        <button onclick="calcInput('1')">1</button>
+                        <button onclick="calcInput('2')">2</button>
+                        <button onclick="calcInput('3')">3</button>
+                        <button onclick="calcInput('-')" class="op">-</button>
 
-                    <button onclick="calcEquals()" class="equals" style="grid-column: span 4;">=</button>
+                        <button onclick="calcClear()" class="clear">C</button>
+                        <button onclick="calcInput('0')">0</button>
+                        <button onclick="calcInput('.')">/.</button>
+                        <button onclick="calcInput('+')" class="op">+</button>
+
+                        <button onclick="calcEquals()" class="equals" style="grid-column: span 4;">=</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scientific Calculator -->
+            <div id="scientificCalcSection" style="display: none;">
+                <div class="calculator-panel">
+                    <div class="calc-operation" id="sciOperation"></div>
+                    <div class="calc-display" id="sciDisplay">0</div>
+
+                    <div class="calc-grid sci-grid">
+                        <!-- Functions -->
+                        <button onclick="sciAppend('sin(')">sin</button>
+                        <button onclick="sciAppend('cos(')">cos</button>
+                        <button onclick="sciAppend('tan(')">tan</button>
+                        <button onclick="sciAppend('ln(')">ln</button>
+                        <button onclick="sciAppend('log10(')">log10</button>
+
+                        <button onclick="sciAppend('asin(')">asin</button>
+                        <button onclick="sciAppend('acos(')">acos</button>
+                        <button onclick="sciAppend('atan(')">atan</button>
+                        <button onclick="sciAppend('sqrt(')">√</button>
+                        <button onclick="sciAppend('^')">^</button>
+
+                        <!-- Controls -->
+                        <button onclick="sciAppend('(')">(</button>
+                        <button onclick="sciAppend(')')">)</button>
+                        <button onclick="sciAppend('PI')">π</button>
+                        <button onclick="sciAppend('E')">e</button>
+                        <button onclick="sciBackspace()">DEL</button>
+
+                        <!-- Numbers and ops -->
+                        <button onclick="sciAppend('7')">7</button>
+                        <button onclick="sciAppend('8')">8</button>
+                        <button onclick="sciAppend('9')">9</button>
+                        <button onclick="sciAppend('/')">÷</button>
+                        <button onclick="sciClear()" class="clear">C</button>
+
+                        <button onclick="sciAppend('4')">4</button>
+                        <button onclick="sciAppend('5')">5</button>
+                        <button onclick="sciAppend('6')">6</button>
+                        <button onclick="sciAppend('*')">×</button>
+                        <button onclick="sciAppend('-')">-</button>
+
+                        <button onclick="sciAppend('1')">1</button>
+                        <button onclick="sciAppend('2')">2</button>
+                        <button onclick="sciAppend('3')">3</button>
+                        <button onclick="sciAppend('+')">+</button>
+                        <button onclick="sciAppend('.')">.</button>
+
+                        <button onclick="sciAppend('0')" style="grid-column: span 4;">0</button>
+                        <button onclick="sciEquals()" class="equals">=</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -439,4 +499,3 @@
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
-```
