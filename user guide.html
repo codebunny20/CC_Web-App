@@ -1,0 +1,284 @@
+<style>
+/* Modern user guide styles */
+.user-guide {
+  --accent: #6366f1;
+  --bg: color-mix(in hsl, var(--accent) 6%, transparent);
+  font-family: system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  max-width: 880px;
+  margin: clamp(1rem,4vw,2.5rem) auto;
+  padding: 0 1rem 4rem;
+  line-height: 1.5;
+}
+@media (prefers-color-scheme: dark) {
+  .user-guide { color: #f5f7fa; }
+}
+.user-guide h2 {
+  font-size: clamp(1.75rem,4vw,2.4rem);
+  background: linear-gradient(120deg,var(--accent),#8b5cf6 55%,#ec4899);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0 0 1.25rem;
+  letter-spacing:.5px;
+}
+.user-guide .guide-item {
+  border: 1px solid color-mix(in hsl,var(--accent) 25%,transparent);
+  border-radius: 14px;
+  margin: .9rem 0;
+  backdrop-filter: blur(6px);
+  background: linear-gradient(145deg,#ffffffee,#f5f7ffcc);
+  overflow: hidden;
+  transition: box-shadow .35s, border-color .35s, background .35s;
+}
+@media (prefers-color-scheme: dark) {
+  .user-guide .guide-item {
+    background: linear-gradient(145deg,#1e1f24cc,#2a2d34dd);
+  }
+}
+.user-guide .guide-item.open {
+  box-shadow: 0 8px 28px -6px color-mix(in hsl,var(--accent) 60%,transparent);
+  border-color: var(--accent);
+}
+.user-guide summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  padding: .85rem 1.05rem;
+  font-weight: 600;
+  font-size: .95rem;
+  letter-spacing:.4px;
+  user-select: none;
+}
+.user-guide summary::-webkit-details-marker { display: none; }
+.user-guide .caret {
+  inline-size: .85rem;
+  block-size: .85rem;
+  border: 2px solid var(--accent);
+  border-left: transparent;
+  border-bottom: transparent;
+  transform: rotate(45deg);
+  transition: transform .35s;
+}
+.user-guide .guide-item.open > summary .caret {
+  transform: rotate(135deg);
+}
+.user-guide details[open] > *:not(summary) {
+  animation: fade .38s ease;
+}
+@keyframes fade {
+  from { opacity: 0; translate: 0 -4px; }
+  to { opacity: 1; translate: 0 0; }
+}
+.user-guide code {
+  background: #00000010;
+  padding: .15rem .45rem;
+  border-radius: 6px;
+  font-size: .85em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  .user-guide code { background:#ffffff14; }
+}
+.user-guide ul, .user-guide ol { margin:.4rem 0 .9rem .95rem; }
+.user-guide ul { list-style: square; }
+.user-guide details ul li, .user-guide details ol li {
+  padding:.15rem 0;
+}
+.user-guide strong { font-weight:600; color: var(--accent); }
+.user-guide p { margin:.4rem 0 .9rem; }
+@media (hover:hover) {
+  .user-guide .guide-item:not(.open):hover {
+    border-color: color-mix(in hsl,var(--accent) 45%,transparent);
+    background: linear-gradient(145deg,#ffffff,#f0f3ff);
+  }
+  @media (prefers-color-scheme: dark) {
+    .user-guide .guide-item:not(.open):hover {
+      background: linear-gradient(145deg,#252830,#31353d);
+    }
+  }
+}
+</style>
+<section id="user-guide" class="user-guide">
+    <h2>4. User Guide</h2>
+  
+    <details open class="guide-item">
+      <summary><span class="caret" aria-hidden="true"></span><span>4.1 Getting Started</span></summary>
+      <h4>First Use</h4>
+      <ol>
+        <li>Click "Home" to see feature overview</li>
+        <li>Select desired tool from buttons</li>
+        <li>All data is saved locally via browser storage</li>
+      </ol>
+    </details>
+  
+    <details class="guide-item">
+      <summary><span class="caret" aria-hidden="true"></span><span>4.2 Unit Converter Tutorial</span></summary>
+      <h4>Step-by-Step</h4>
+      <ol>
+        <li>Click "🔄 Unit Converter" or nav button</li>
+        <li>Select Category (default: Length)</li>
+        <li>Choose "From" unit (source unit)</li>
+        <li>Enter numerical value</li>
+        <li>Press "Convert" or hit Enter</li>
+        <li>View results in grid below</li>
+      </ol>
+      <h4>Tips</h4>
+      <ul>
+        <li>Supports decimal and exponential notation</li>
+        <li>Auto-formats results, removes trailing zeros</li>
+        <li>Scientific notation for extreme values</li>
+        <li>Temperature conversions maintain 2-decimal precision</li>
+      </ul>
+      <h4>Example</h4>
+      <p><strong>Category:</strong> Length<br>
+      <strong>From:</strong> kilometer (km)<br>
+      <strong>Value:</strong> 5</p>
+      <ul>
+        <li>meter (m): 5000</li>
+        <li>mile (mi): 3.10686</li>
+      </ul>
+    </details>
+  
+    <details class="guide-item">
+      <summary><span class="caret" aria-hidden="true"></span><span>4.3 Calculator Usage</span></summary>
+      <h4>Basic Operations</h4>
+      <ul>
+        <li>Click buttons or use keyboard</li>
+        <li>Operators: <code>+, -, *, ÷, ^</code></li>
+        <li>Equals: <code>=</code> or Enter</li>
+        <li>Clear: <code>C</code> or ESC</li>
+      </ul>
+      <h4>Memory Functions</h4>
+      <ul>
+        <li>M+: Add to memory</li>
+        <li>M-: Subtract from memory</li>
+        <li>MR: Recall memory</li>
+        <li>MC: Clear memory</li>
+      </ul>
+      <h4>History Features</h4>
+      <ul>
+        <li>Auto-recorded</li>
+        <li>Click to recall</li>
+        <li>Clear History button</li>
+        <li>Persists across sessions</li>
+      </ul>
+      <h4>Scientific Functions</h4>
+      <ul>
+        <li>Trig: sin, cos, tan, asin, acos, atan</li>
+        <li>Log: log, ln</li>
+        <li>Other: sqrt, exp, abs, π, e</li>
+      </ul>
+      <h4>Keyboard Shortcuts</h4>
+      <ul>
+        <li>Enter: Calculate</li>
+        <li>C: Clear</li>
+        <li>Backspace: Delete last character</li>
+      </ul>
+      <h4>Example</h4>
+      <p><code>2 + 3 * 4 ^ 2</code> → <strong>50</strong></p>
+    </details>
+  
+    <details class="guide-item">
+      <summary><span class="caret" aria-hidden="true"></span><span>4.4 Graphing Tutorial</span></summary>
+      <h4>Basic Graphing</h4>
+      <ol>
+        <li>Enter expression (e.g., <code>sin(x)</code>)</li>
+        <li>Set X-range</li>
+        <li>Choose Y-range: Auto or Manual</li>
+        <li>Click "Plot" or press Enter</li>
+        <li>View graph with axes and grid</li>
+      </ol>
+      <h4>Expression Syntax</h4>
+      <ul>
+        <li>Valid: <code>sin(x), x^2, sqrt(x)</code></li>
+        <li>Invalid: <code>[x], |x|, x!</code></li>
+        <li>Compound: <code>sin(x) + cos(2*x)</code></li>
+      </ul>
+      <h4>Auto-Y Mode</h4>
+      <ul>
+        <li>Auto-calculates Y bounds</li>
+        <li>Adds 10% padding</li>
+      </ul>
+      <h4>Manual Y-Range</h4>
+      <ul>
+        <li>Uncheck "Auto Y" to enable</li>
+        <li>Specify <code>ymin</code> and <code>ymax</code></li>
+      </ul>
+      <h4>Common Functions</h4>
+      <ul>
+        <li>Linear, Quadratic, Cubic, Sine, Exponential, Logarithmic, Rational</li>
+      </ul>
+      <h4>Troubleshooting</h4>
+      <ul>
+        <li>Check syntax errors</li>
+        <li>Adjust X-range</li>
+        <li>Ensure <code>xmin &lt; xmax</code></li>
+        <li>Discontinuities are normal</li>
+      </ul>
+    </details>
+  
+    <details class="guide-item">
+      <summary><span class="caret" aria-hidden="true"></span><span>4.5 Game Calculator Guide</span></summary>
+      <h4>RPM Converter</h4>
+      <ul>
+        <li>Standard: RPM ↔ RPS ↔ Hz ↔ rad/s</li>
+        <li>Firearm ROF: RPM ↔ RPS ↔ RPH</li>
+      </ul>
+      <h4>Reload Calculator</h4>
+      <ul>
+        <li>Inputs: Magazine Size, Reload Time, RPS</li>
+        <li>Outputs: Cycle Time, Sustained RPM</li>
+      </ul>
+      <h4>Weapon Swap Analysis</h4>
+      <ul>
+        <li>Inputs: Reload times, swap time</li>
+        <li>Outputs: Time saved, efficiency gain</li>
+      </ul>
+      <h4>DPS Calculator</h4>
+      <ul>
+        <li>Inputs: Damage, RPM, mag size, reload, accuracy</li>
+        <li>Outputs: DPS (raw/sustained), damage per mag</li>
+      </ul>
+      <h4>TTK Calculator</h4>
+      <ul>
+        <li>Inputs: Health, damage, RPM, headshot multiplier</li>
+        <li>Outputs: Body, headshot, mixed TTK</li>
+      </ul>
+    </details>
+  
+    <details class="guide-item">
+      <summary><span class="caret" aria-hidden="true"></span><span>4.6 Misc Converter Guide</span></summary>
+      <ul>
+        <li><strong>Angle:</strong> Degrees ↔ Radians</li>
+        <li><strong>Sound:</strong> W/m² ↔ dB (log scale)</li>
+        <li><strong>Power:</strong> Watt, kW, HP</li>
+        <li><strong>Pressure:</strong> Pascal, atm, psi, bar</li>
+        <li><strong>Data:</strong> Binary vs Decimal, bits vs bytes</li>
+        <li><strong>Frequency:</strong> Hz, kHz, MHz, GHz, THz</li>
+      </ul>
+    </details>
+  
+    <details class="guide-item">
+      <summary><span class="caret" aria-hidden="true"></span><span>4.7 Settings Management</span></summary>
+      <ul>
+        <li><strong>Theme:</strong> Dark, Light, Auto</li>
+        <li><strong>Preferences:</strong> Default category, decimal places</li>
+        <li><strong>Graph:</strong> Resolution, grid toggle</li>
+        <li><strong>Storage:</strong> localStorage (~5–10MB)</li>
+      </ul>
+    </details>
+</section>
+<script>
+/* Enhance details: toggle .open class + optional accordion (uncomment to enable exclusive open) */
+const items = document.querySelectorAll('.guide-item');
+items.forEach(d=>{
+  if(d.open) d.classList.add('open');
+  d.addEventListener('toggle', ()=>{
+    d.classList.toggle('open', d.open);
+    // Accordion behavior:
+    // if(d.open){ items.forEach(o=>{ if(o!==d) o.open=false; }); }
+  });
+});
+</script>
