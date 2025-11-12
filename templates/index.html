@@ -107,12 +107,14 @@
             </div>
 
             <div class="tab-switch">
-                <button id="tabBasic" class="btn-secondary active" onclick="showCalcTab('basic')">Basic</button>
-                <button id="tabScientific" class="btn-secondary" onclick="showCalcTab('scientific')">Scientific</button>
+                <button id="tabBasic" class="btn-secondary calc-tab active" onclick="showCalcTab('basic')">Basic</button>
+                <button id="tabScientific" class="btn-secondary calc-tab" onclick="showCalcTab('scientific')">Scientific</button>
+                <button id="tabProgrammer" class="btn-secondary calc-tab" onclick="showCalcTab('programmer')">Programmer</button>
+                <button id="tabFinance" class="btn-secondary calc-tab" onclick="showCalcTab('finance')">Finance</button>
             </div>
 
             <!-- Basic Calculator -->
-            <div id="basicCalcSection">
+            <div id="basicCalcSection" class="calc-mode">
                 <div class="calculator-panel">
                     <div class="calc-display" id="calcDisplay">0</div>
                     <div class="calc-grid">
@@ -142,7 +144,7 @@
             </div>
 
             <!-- Scientific Calculator -->
-            <div id="scientificCalcSection" style="display: none;">
+            <div id="scientificCalcSection" class="calc-mode" style="display: none;">
                 <div class="calculator-panel sci-panel">
                     <div class="calc-operation" id="sciOperation"></div>
                     <div class="calc-display" id="sciDisplay">0</div>
@@ -190,6 +192,22 @@
                         <button onclick="sciAppend('0')" style="grid-column: span 3;">0</button>
                         <button onclick="sciEquals()" class="equals">=</button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Programmer Calculator (placeholder, non-breaking) -->
+            <div id="programmerCalcSection" class="calc-mode" style="display: none;">
+                <div class="calculator-panel">
+                    <div class="calc-operation">Programmer Mode</div>
+                    <div class="calc-display" id="progDisplay">Coming soon</div>
+                </div>
+            </div>
+
+            <!-- Finance Calculator (placeholder, non-breaking) -->
+            <div id="financeCalcSection" class="calc-mode" style="display: none;">
+                <div class="calculator-panel">
+                    <div class="calc-operation">Finance Mode</div>
+                    <div class="calc-display" id="finDisplay">Coming soon</div>
                 </div>
             </div>
         </div>

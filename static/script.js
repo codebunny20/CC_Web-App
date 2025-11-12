@@ -471,24 +471,27 @@ let sciExpr = '';
 let sciAns = null;
 
 function showCalcTab(tab) {
-    const basic = document.getElementById('basicCalcSection');
-    const sci = document.getElementById('scientificCalcSection');
-    const tabBasic = document.getElementById('tabBasic');
-    const tabSci = document.getElementById('tabScientific');
+    const map = {
+        basic: 'basicCalcSection',
+        scientific: 'scientificCalcSection',
+        programmer: 'programmerCalcSection',
+        finance: 'financeCalcSection',
+    };
+    const targetId = map[tab] || map.basic;
 
-    if (!basic || !sci) return;
+    // Hide all calculator mode sections
+    document.querySelectorAll('.calc-mode').forEach(sec => sec.style.display = 'none');
+    const target = document.getElementById(targetId);
+    if (target) target.style.display = '';
 
-    if (tab === 'basic') {
-        basic.style.display = '';
-        sci.style.display = 'none';
-        if (tabBasic) tabBasic.classList.add('active');
-        if (tabSci) tabSci.classList.remove('active');
-    } else {
-        basic.style.display = 'none';
-        sci.style.display = '';
-        if (tabBasic) tabBasic.classList.remove('active');
-        if (tabSci) tabSci.classList.add('active');
-    }
+    // Update active state on tab buttons
+    document.querySelectorAll('.calc-tab').forEach(btn => btn.classList.remove('active'));
+    const btnId = tab === 'basic' ? 'tabBasic'
+                : tab === 'scientific' ? 'tabScientific'
+                : tab === 'programmer' ? 'tabProgrammer'
+                : 'tabFinance';
+    const activeBtn = document.getElementById(btnId);
+    if (activeBtn) activeBtn.classList.add('active');
 }
 
 function updateSciDisplays() {
