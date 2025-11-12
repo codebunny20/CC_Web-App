@@ -119,14 +119,27 @@ function applyTheme() {
     if (graphState) drawGraph();
 }
 
+// ============= CALCULATOR STATE =============
+let calcDisplay = '0';
+let calcOperand = null;
+let calcLastOperator = null;
+let shouldResetDisplay = false;
+
+// ============= PAGE INITIALIZATION =============
+document.addEventListener('DOMContentLoaded', () => {
+    calcClear();
+    updateUnits();
+    updateMiscUnits();
+    sciClear();
+    progRefresh();
+});
+
 window.addEventListener('load', () => {
     loadAllSettings();
     applyTheme();
     setupSettingsListeners();
-    loadCalculatorState();
 });
 
-// Save settings before leaving page
 window.addEventListener('beforeunload', () => {
     saveAllSettings();
 });
@@ -333,11 +346,6 @@ function convertSpecialMisc(value, category, fromUnit, decimalPlaces) {
 }
 
 // ============= CALCULATOR =============
-let calcDisplay = '0';
-let calcOperand = null;
-let calcLastOperator = null;
-let shouldResetDisplay = false;
-
 function updateCalcOperation() {
     const operationDisplay = document.getElementById('calcOperation');
     if (!operationDisplay) return;

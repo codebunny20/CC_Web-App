@@ -1,12 +1,9 @@
 from flask import Flask, render_template, request, jsonify
 import math
-import json
-import os
-
 
 app = Flask(__name__)
 
-# Conversion factors (same as desktop app)
+# Conversion factors
 FACTORS = {
     "LENGTH": {
         "meter (m)": 1,
