@@ -1,0 +1,453 @@
+<style>
+    :root {
+      --bg: linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#334155 100%);
+      --panel-bg: rgba(255,255,255,0.08);
+      --panel-border: rgba(255,255,255,0.15);
+      --radius: 18px;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --text-main: #ffffff; /* changed to white */
+      --text-dim: #ffffff;  /* changed to white */
+      --shadow: 0 8px 24px -6px rgba(0,0,0,0.4);
+      --transition: 160ms cubic-bezier(.4,.2,.2,1);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: linear-gradient(135deg,#f8fafc 0%,#e2e8f0 50%,#cbd5e1 100%);
+        --panel-bg: rgba(255,255,255,0.7);
+        --panel-border: rgba(0,0,0,0.08);
+        --text-main:#ffffff; /* force white in light mode */
+        --text-dim:#ffffff;  /* force white in light mode */
+        --shadow: 0 6px 18px -4px rgba(0,0,0,0.15);
+      }
+    }
+    body:not(.embedded) {
+      background: var(--bg);
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;
+      margin:0;
+      padding:40px 24px;
+      -webkit-font-smoothing: antialiased;
+      color:#ffffff; /* force all default text to white */
+    }
+    .notice-wrapper {
+      max-width: 880px;
+      margin: 0 auto;
+    }
+    #notice-page {
+      backdrop-filter: blur(22px) saturate(160%);
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      padding: clamp(1.75rem,3vw,2.75rem);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    #notice-page:before {
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at 85% 15%,rgba(99,102,241,0.25),transparent 60%),
+        radial-gradient(circle at 15% 85%,rgba(14,165,233,0.22),transparent 65%);
+      pointer-events:none;
+      opacity:.6;
+    }
+    #notice-page h2 {
+      margin:0 0 1rem;
+      font-size:clamp(1.9rem,4.2vw,2.55rem);
+      line-height:1.15;
+      letter-spacing:.5px;
+      background:none !important;
+      -webkit-background-clip: initial !important;
+      background-clip: initial !important;
+      color:#ffffff !important;
+    }
+    #notice-page p {
+      color: var(--text-dim);
+      font-size: clamp(.95rem,1.4vw,1.05rem);
+      line-height:1.55;
+      margin:0 0 1.75rem;
+      max-width: 62ch;
+    }
+    details {
+      background: linear-gradient(155deg,rgba(255,255,255,0.10),rgba(255,255,255,0.03));
+      border:1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: .9rem 1.05rem .95rem;
+      margin:0 0 1rem;
+      position:relative;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    details[open] {
+      background: linear-gradient(155deg,rgba(255,255,255,0.18),rgba(255,255,255,0.05));
+    }
+    details:focus-within,
+    details:hover {
+      border-color: var(--accent);
+    }
+    summary {
+      list-style:none;
+      cursor:pointer;
+      font-weight:600;
+      font-size:1.02rem;
+      display:flex;
+      align-items:center;
+      gap:.6rem;
+      color: var(--text-main); /* fixed var spacing */
+    }
+    summary::-webkit-details-marker { display:none; }
+    summary:before {
+      content:"›";
+      font-family: ui-monospace,monospace;
+      display:inline-block;
+      width:1.05rem;
+      transform:rotate(90deg);
+      transition: transform var(--transition);
+      color: var(--accent);
+      text-shadow:0 0 4px rgba(99,102,241,.4);
+    }
+    details[open] > summary:before {
+      transform:rotate(270deg);
+    }
+    ul {
+      margin:.85rem 0 0;
+      padding:0;
+      list-style:none;
+    }
+    /* Timeline style for first list (updates) */
+    details[open] > ul:first-of-type li {
+      position:relative;
+      padding: .65rem .75rem .65rem 1.4rem;
+      margin:0;
+      font-size:.92rem;
+      color: var(--text-dim);
+      line-height:1.4;
+      border-left:2px solid rgba(99,102,241,0.35);
+    }
+    details[open] > ul:first-of-type li:last-child {
+      border-image: linear-gradient(to bottom,rgba(99,102,241,.35),rgba(99,102,241,0)) 1;
+    }
+    details[open] > ul:first-of-type li:before {
+      content:"";
+      position:absolute;
+      left:-6px;
+      top:14px;
+      width:12px;
+      height:12px;
+      background: radial-gradient(circle at 35% 35%,#fff 0%,#818cf8 65%);
+      border:2px solid #1e1e2f44;
+      border-radius:50%;
+      box-shadow:0 0 0 4px rgba(99,102,241,0.18);
+    }
+    li strong {
+      color: var (--text-main);
+      font-weight:600;
+    }
+    em {
+      color: inherit; /* ensure white text is preserved */
+      font-style: normal;
+      font-weight:600;
+    }
+    /* Fancy focus ring */
+    summary:focus-visible {
+      outline:2px solid var(--accent);
+      outline-offset:4px;
+      border-radius:8px;
+    }
+    /* Smooth open animation */
+    details > *:not(summary) {
+      animation: fadeSlide .35s ease;
+    }
+    @keyframes fadeSlide {
+      from { opacity:0; transform:translateY(-4px); }
+      to { opacity:1; transform:translateY(0); }
+    }
+    /* Responsive spacing */
+    @media (max-width:640px) {
+      #notice-page { padding: 1.6rem 1.25rem 2rem; }
+      details { padding:.75rem .85rem .85rem; }
+      summary { font-size:1rem; }
+    }
+    /* Reduced motion respect */
+    @media (prefers-reduced-motion: reduce) {
+      * { animation:none !important; transition:none !important; }
+    }
+  </style>
+  <script>
+    // Progressive enhancement: smooth height transition for details
+    document.addEventListener('click', e => {
+      if (e.target.tagName === 'SUMMARY') {
+        const d = e.target.parentElement;
+        if (!d.dataset.anim) {
+          d.dataset.anim = 'true';
+          const start = d.open ? d.scrollHeight : 0;
+          requestAnimationFrame(() => {
+            if (!d.open) d.open = true;
+            const end = d.scrollHeight;
+            d.style.height = start + 'px';
+            d.style.overflow = 'hidden';
+            d.animate([
+              { height: start + 'px' },
+              { height: end + 'px' }
+            ], { duration: 260, easing: 'cubic-bezier(.4,.2,.2,1)' }).onfinish = () => {
+              d.style.height = '';
+              d.style.overflow = '';
+              d.dataset.anim='';
+            };
+          });
+          if (d.open) { // closing
+            e.preventDefault();
+            const full = d.scrollHeight;
+            d.style.height = full + 'px';
+            d.style.overflow = 'hidden';
+            d.animate([
+              { height: full + 'px' },
+              { height: 0 }
+            ], { duration: 260, easing:'cubic-bezier(.4,.2,.2,1)' }).onfinish = () => {
+              d.open = false;
+              d.style.height = '';
+              d.style.overflow = '';
+              d.dataset.anim='';
+            };
+          }
+        }
+      }
+    });
+  </script>
+  <div class="notice-wrapper">
+    <section id="notice-page" aria-labelledby="notice-title">
+      <h2 id="notice-title">👋 Welcome to CurioCorner Tools & Updates</h2>
+      <p>This hub tracks improvements and announcements for every CurioCorner tool — converters, calculators, the randomizer, time manager, and upcoming utilities. Check here for performance tweaks, new capabilities, and previews of what’s next.</p>
+  
+      <details open>
+        <summary>🔧 Latest Updates & Announcements</summary>
+        <ul>
+        <li><strong>Nov 12, 2025:</strong> Added two new Features to calculator the: scientific and programmer calculators</li>    
+        <li><strong>Nov 11, 2025:</strong> Modernized all tool and tool info pages with a beter looking html pages</li>
+        <li><strong>Nov 9, 2025:</strong> Added a comprehensive guide of unit of meassurment to the cc(converter&calculator)</li>
+        <li><strong>Nov 8, 2025:</strong> Added bug report template to Help page for easier issue submission</li>
+          <li><strong>Nov 4, 2025:</strong> Fixed a calculation error in the Basic Calculator (edge-case division rounding)</li>
+          <li><strong>Nov 3, 2025:</strong> Randomizer now supports weighted entries and quick duplicate control</li>
+          <li><strong>Nov 2, 2025:</strong> Added temperature conversions (°C, °F, K) to Unit Converter</li>
+          <li><strong>Oct 31, 2025:</strong> Time Manager: improved timezone handling and 24h format toggle</li>
+          <li><strong>Oct 30, 2025:</strong> Graphing Calculator performance improvements for complex expressions</li>
+          <li><strong>Oct 28, 2025:</strong> Minor UI accessibility tweaks across mobile layouts</li>
+          <li><strong>Upcoming:</strong> Currency Conversion module entering testing phase</li>
+        </ul>
+      </details>
+  
+      <details>
+        <summary>🧰 What’s Inside</summary>
+        <ul>
+          <li><strong>Unit Converter</strong> — Length, mass, volume, temperature, more</li>
+          <li><strong>Basic Calculator</strong> — Fast math with keyboard shortcuts</li>
+          <li><strong>Graphing Calculator</strong> — Plot functions and visualize equations</li>
+          <li><strong>Misc Converter</strong> — Flexible custom conversions</li>
+          <li><strong>Randomizer</strong> — Shuffle lists, pick winners, weighted selection</li>
+          <li><strong>Time Manager</strong> — Timers, countdowns, timezone planning</li>
+          <li><em>More tools coming soon</em> — programmer mode, currency conversion, smart input, scheduling assistant</li>
+        </ul>
+      </details>
+  
+      <details>
+        <summary>🆕 Upcoming & Announcements</summary>
+        <ul>
+          <li><strong>Currency Converter and finance calculator</strong> — Live rates + offline fallback (ETA: mid Nov)</li>
+          <li><strong>Scheduling Assistant</strong> — Multi-zone meeting slot finder</li>
+          <li><strong>Smart Input</strong> — Auto-detect unit types and suggest tool context</li>
+          <li><em>Have an idea?</em> Use the Help page to submit feature requests.</li>
+        </ul>
+      </details>
+    </section>
+  </div>
+  <style>
+    /* Modern styling for Help Page */
+    :root {
+      --accent:#6366f1;
+      --accent-accent:#8b5cf6;
+      --border-color:#d9dce3;
+      --card-bg:rgba(255,255,255,.72);
+      --text:#ffffff; /* changed to white */
+      --link:#6366f1;
+      --link-hover:#4f46e5;
+      --bg:linear-gradient(135deg,#f8fafc,#eef2ff 70%);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --border-color:#374151;
+        --card-bg:rgba(30,41,59,.72);
+        --text:#ffffff;      /* force white in dark mode too */
+        --link:#818cf8;
+        --link-hover:#a5b4fc;
+        --bg:linear-gradient(135deg,#0f172a,#1e1b4b 70%);
+      }
+    }
+    #help-page {
+      max-width:820px;
+      margin:clamp(1rem,3vw,3rem) auto;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      line-height:1.5;
+      background:var(--bg);
+      padding:2rem 2.25rem;
+      border-radius:1.5rem;
+    }
+    #help-page h2 {
+      margin:0 0 1.25rem;
+      font-size:clamp(1.8rem,4vw,2.4rem);
+      background:none !important;
+      -webkit-background-clip: initial !important;
+      background-clip: initial !important;
+      color:#ffffff !important;
+    }
+    #help-page details {
+      border:1px solid var(--border-color);
+      border-radius:.9rem;
+      padding:.75rem 1rem 1rem;
+      background:var(--card-bg);
+      backdrop-filter:blur(6px);
+      box-shadow:0 4px 12px rgba(0,0,0,.08);
+      transition:border-color .25s, box-shadow .25s;
+      overflow:hidden;
+    }
+    #help-page details[open] {
+      box-shadow:0 6px 20px rgba(0,0,0,.12);
+    }
+    #help-page summary {
+      font-weight:600;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      gap:.55rem;
+      list-style:none;
+      user-select:none;
+      color:#ffffff; /* ensure summary is white */
+    }
+    #help-page summary::-webkit-details-marker { display:none; }
+    .summary-icon {
+      inline-size:1.15rem;
+      aspect-ratio:1;
+      display:inline-grid;
+      place-content:center;
+      border-radius:50%;
+      background:var(--accent);
+      color:#fff;
+      font-size:.7rem;
+      font-weight:700;
+      letter-spacing:.5px;
+    }
+    #help-page p,#help-page li { color:var(--text); }
+    #help-page a {
+      color:#ffffff !important;
+      text-decoration:none;
+      position:relative;
+    }
+    #help-page a:hover { color:#ffffff !important; text-decoration:underline; }
+    #help-page a:focus-visible {
+      outline:2px solid var(--accent);
+      outline-offset:2px;
+      border-radius:.3rem;
+    }
+    #help-page ul { margin:.5rem 0 0; padding-left:1.25rem; }
+    .template-box { margin-top:.75rem; position:relative; }
+    .template-box textarea {
+      width:100%;
+      min-height:220px;
+      resize:vertical;
+      background:rgba(0,0,0,.04);
+      border:1px solid var(--border-color);
+      border-radius:.65rem;
+      padding:.85rem .9rem;
+      font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+      font-size:.85rem;
+      line-height:1.4;
+      color:#ffffff;
+    }
+    @media (prefers-color-scheme: dark) {
+      .template-box textarea { background:rgba(255,255,255,.05); }
+    }
+    .copy-template {
+      margin-top:.65rem;
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      background:var(--accent);
+      color:#fff;
+      border:none;
+      padding:.55rem .95rem;
+      font:inherit;
+      font-weight:600;
+      border-radius:.55rem;
+      cursor:pointer;
+      box-shadow:0 2px 6px rgba(0,0,0,.15);
+      transition:background .25s, transform .25s;
+    }
+    .copy-template:hover { background:var(--accent-accent); }
+    .copy-template:active { transform:translateY(2px); }
+    .badge {
+      display:inline-block;
+      background:var(--accent);
+      color:#fff;
+      padding:.25rem .55rem;
+      border-radius:.6rem;
+      font-size:.65rem;
+      letter-spacing:.5px;
+      text-transform:uppercase;
+      vertical-align:middle;
+    }
+    footer.help-foot {
+      margin-top:1.5rem;
+      font-size:.75rem;
+      opacity:.7;
+      text-align:center;
+      color:#ffffff; /* ensure footer text is white */
+    }
+    </style>
+    <script>
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('.copy-template');
+      if (!btn) return;
+      const ta = document.querySelector('#bug-template-textarea');
+      if (!ta) return;
+      navigator.clipboard.writeText(ta.value).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy Template', 1800);
+      });
+    });
+    </script>
+    
+    <section id="help-page" class="help-page">
+        <h2>Help Page</h2>
+      
+        <details open>
+          <summary><span class="summary-icon">?</span>Contact & Support</summary>
+          <p>For issues, suggestions, or contributions:</p>
+          <ul>
+            <li><strong>Email:</strong> <a href="https://mail.google.com/mail/?view=cm&fs=1&to=bunnycontact.me@gmail.com&su=CurioCorner%20Support%20Request" target="_blank" rel="noopener">bunnycontact.me@gmail.com</a></li>
+            <li><strong>GitHub:</strong> <a href="https://github.com/codebunny20/CC_Web-App" target="_blank">codebunny20/CC_Web-App</a></li>
+            <li><strong>Reddit:</strong> <em>TBD</em></li>
+          </ul>
+        </details>
+      
+        <details>
+          <summary><span class="summary-icon">!</span>Bug Report Template</summary>
+          <p>Copy and paste the format below into an email, fill in the details, and send it to <a href="https://mail.google.com/mail/?view=cm&fs=1&to=bunnycontact.me@gmail.com&su=CurioCorner%20Bug%20Report" target="_blank" rel="noopener">bunnycontact.me@gmail.com</a>.</p>
+      
+          <div class="template-box">
+            <textarea id="bug-template-textarea" readonly>
+    Title: Short description of the problem
+    Browser and version:
+    Device and OS:
+    Steps to reproduce:
+    Expected result (if known):
+    Actual result:
+    Screenshots/logs:
+            </textarea>
+            <button type="button" class="copy-template" aria-label="Copy bug report template">Copy Template</button>
+          </div>
+      
+          <p><span class="badge">Tip</span> This helps me find problems and fix them easier 👍</p>
+        </details>
+      
+        <footer class="help-foot">Thanks for helping improve the project ❤️</footer>
+    </section>
