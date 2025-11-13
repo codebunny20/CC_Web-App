@@ -146,7 +146,8 @@ def api_convert():
         if category == "Temperature":
             result = convert_temperature(from_unit, to_unit, value)
         else:
-            result = linear_convert(value, from_unit, to_unit, FACTORS[category])
+            factors = FACTORS.get(category.upper(), {})
+            result = linear_convert(value, from_unit, to_unit, factors)
         
         return jsonify({"success": True, "result": format_number(result)})
     except Exception as e:
@@ -174,9 +175,11 @@ def api_convert_all():
     try:
         for to_unit in units:
             if category == "Temperature":
-                results[to_unit] = format_number(convert_temperature(from_unit, to_unit, value))
+                result = convert_temperature(from_unit, to_unit, value)
             else:
-                results[to_unit] = format_number(linear_convert(value, from_unit, to_unit, FACTORS[category]))
+                factors = FACTORS.get(category.upper(), {})
+                result = linear_convert(value, from_unit, to_unit, factors)
+            results[to_unit] = format_number(result)
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
     
@@ -185,7 +188,6 @@ def api_convert_all():
 @app.route('/api/convert-misc', methods=['POST'])
 def api_convert_misc():
     """Convert misc units (Angle, Power, etc)."""
-    import math
     data = request.json
     category = data.get('category', 'Angle')
     from_unit = data.get('from_unit')
@@ -196,17 +198,19 @@ def api_convert_misc():
         units = MISC_UNITS.get(category, [])
         for to_unit in units:
             if category == "Angle":
-                results[to_unit] = format_number(convert_misc_angle(from_unit, to_unit, value))
+                result = convert_misc_angle(from_unit, to_unit, value)
             elif category == "Sound Intensity":
-                results[to_unit] = format_number(convert_misc_sound_intensity(from_unit, to_unit, value))
+                result = convert_misc_sound_intensity(from_unit, to_unit, value)
+            elif category in ["Power", "Pressure", "Data"]:
+                factors = FACTORS[category.upper()]
+                result = linear_convert(value, from_unit, to_unit, factors)
             elif category == "Frequency":
-                results[to_unit] = format_number(convert_misc_frequency(from_unit, to_unit, value))
+                result = convert_misc_frequency(from_unit, to_unit, value)
             elif category == "RPM":
-                results[to_unit] = format_number(convert_misc_rpm(from_unit, to_unit, value))
+                result = convert_misc_rpm(from_unit, to_unit, value)
             elif category == "Firearm ROF":
-                results[to_unit] = format_number(convert_firearm_rof(from_unit, to_unit, value))
-            else:
-                results[to_unit] = format_number(linear_convert(value, from_unit, to_unit, FACTORS[category]))
+                result = convert_firearm_rof(from_unit, to_unit, value)
+            results[to_unit] = format_number(result)
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
     

@@ -91,6 +91,9 @@
                 <input type="number" id="inputValue" step="any" onkeypress="if(event.key==='Enter') convertUnits()">
             </div>
 
+            <input type="number" id="conversionValue" placeholder="Enter value">
+            <div id="conversionResults" class="results-section"></div>
+
             <button onclick="convertUnits()" class="btn-primary">Convert</button>
 
             <div class="results-section">
@@ -116,29 +119,31 @@
             <!-- Basic Calculator -->
             <div id="basicCalcSection" class="calc-mode">
                 <div class="calculator-panel">
-                    <div class="calc-display" id="calcDisplay">0</div>
+                    <input type="text" id="calcDisplay" readonly>
                     <div class="calc-grid">
+                        <button onclick="calcClear()" class="clear">C</button>
+                        <button onclick="calcBackspace()">←</button>
+                        <button onclick="calcOperator('/')" class="op">÷</button>
+                        <button onclick="calcOperator('*')" class="op">×</button>
+                        
                         <button onclick="calcInput('7')">7</button>
                         <button onclick="calcInput('8')">8</button>
                         <button onclick="calcInput('9')">9</button>
-                        <button onclick="calcInput('/')" class="op">÷</button>
-
+                        <button onclick="calcOperator('-')" class="op">−</button>
+                        
                         <button onclick="calcInput('4')">4</button>
                         <button onclick="calcInput('5')">5</button>
                         <button onclick="calcInput('6')">6</button>
-                        <button onclick="calcInput('*')" class="op">×</button>
-
+                        <button onclick="calcOperator('+')" class="op">+</button>
+                        
                         <button onclick="calcInput('1')">1</button>
                         <button onclick="calcInput('2')">2</button>
                         <button onclick="calcInput('3')">3</button>
-                        <button onclick="calcInput('-')" class="op">-</button>
-
-                        <button onclick="calcClear()" class="clear">C</button>
-                        <button onclick="calcInput('0')">0</button>
-                        <button onclick="calcInput('.')">/.</button>
-                        <button onclick="calcInput('+')" class="op">+</button>
-
-                        <button onclick="calcEquals()" class="equals" style="grid-column: span 4;">=</button>
+                        <button onclick="calcOperator('%')" class="op">%</button>
+                        
+                        <button onclick="calcInput('0')" style="grid-column: span 2;">0</button>
+                        <button onclick="calcInput('.')">.</button>
+                        <button onclick="calcEquals()" class="equals">=</button>
                     </div>
                 </div>
             </div>
@@ -291,6 +296,8 @@
                     <option>Pressure</option>
                     <option>Data</option>
                     <option>Frequency</option>
+                    <option>RPM</option>
+                    <option>Firearm ROF</option>
                 </select>
             </div>
 
@@ -300,8 +307,13 @@
             </div>
 
             <div class="form-group">
+                <label>To:</label>
+                <select id="miscToUnit"></select>
+            </div>
+
+            <div class="form-group">
                 <label>Value:</label>
-                <input type="number" id="miscInputValue" step="any" onkeypress="if(event.key==='Enter') convertMisc()">
+                <input type="number" id="miscValue" placeholder="Enter value">
             </div>
 
             <button onclick="convertMisc()" class="btn-primary">Convert</button>
@@ -417,7 +429,7 @@
                     <label>Damage Per Shot:</label>
                     <input type="number" id="ttkDamage" min="0.1" step="0.1" value="25">
                 </div>
-                <div class="form-group">
+                <div class="form-group"></div>
                     <label>Fire Rate (Rounds Per Minute):</label>
                     <input type="number" id="ttkRPM" min="1" step="1" value="600">
                 </div>
@@ -443,7 +455,7 @@
                     <label>x min: <input type="number" id="graphXmin" value="-10" style="width:80px;"></label>
                     <label>x max: <input type="number" id="graphXmax" value="10" style="width:80px;"></label>
                 </div>
-                <div class="control-row">
+                <div class="control-row"></div>
                     <label><input type="checkbox" id="graphAutoY" checked onchange="toggleAutoY()"> Auto Y</label>
                     <label>y min: <input type="number" id="graphYmin" value="-5" style="width:80px;" disabled></label>
                     <label>y max: <input type="number" id="graphYmax" value="5" style="width:80px;" disabled></label>
@@ -551,7 +563,7 @@
             <div class="page-header">
                 <h2>About CC App</h2>
             </div>
-            <div class="about-content">
+            <div class="about-content"></div>
                 <p><strong>CC App — Converter & Calculator</strong></p>
                 <p>A fast, powerful, and simple all-in-one tool for unit conversions and calculations.</p>
 

@@ -243,106 +243,108 @@ const miscConversionData = {
 // ============= CONVERTER FUNCTIONS =============
 function updateUnits() {
     const category = document.getElementById('category').value;
-    const units = Object.keys(conversionData[category]);
-    const select = document.getElementById('fromUnit');
-    select.innerHTML = units.map(u => `<option>${u}</option>`).join('');
+    const fromUnit = document.getElementById('fromUnit');
+    const toUnit = document.getElementById('toUnit');
+    
+    const units = {
+        'Length': ['meter (m)', 'kilometer (km)', 'centimeter (cm)', 'millimeter (mm)', 'inch (in)', 'foot (ft)', 'yard (yd)', 'mile (mi)'],
+        'Mass': ['kilogram (kg)', 'gram (g)', 'milligram (mg)', 'metric ton (t)', 'ounce (oz)', 'pound (lb)', 'stone'],
+        'Time': ['second (s)', 'minute (min)', 'hour (h)', 'day', 'week', 'year'],
+        'Temperature': ['Celsius (°C)', 'Fahrenheit (°F)', 'kelvin (K)'],
+        'Area': ['square meter (m²)', 'hectare (ha)', 'acre', 'square kilometer (km²)', 'square foot (ft²)', 'square inch (in²)'],
+        'Volume': ['cubic meter (m³)', 'liter (L)', 'milliliter (mL)', 'gallon (US)', 'gallon (UK)', 'pint (US)', 'quart (US)', 'cubic foot (ft³)', 'cubic inch (in³)'],
+        'Speed': ['meter per second (m/s)', 'kilometer per hour (km/h)', 'mile per hour (mph)', 'foot per second (ft/s)', 'knot (kn)']
+    };
+    
+    const unitList = units[category] || [];
+    
+    fromUnit.innerHTML = unitList.map(u => `<option>${u}</option>`).join('');
+    toUnit.innerHTML = unitList.map(u => `<option>${u}</option>`).join('');
 }
 
 function convertUnits() {
     const category = document.getElementById('category').value;
     const fromUnit = document.getElementById('fromUnit').value;
-    const value = parseFloat(document.getElementById('inputValue').value);
-    const decimalPlaces = parseInt(localStorage.getItem('decimalPlaces')) || 4;
-
-    if (isNaN(value)) {
-        alert('Enter a valid number');
+    const toUnit = document.getElementById('toUnit').value;
+    const value = parseFloat(document.getElementById('conversionValue').value) || 0;
+    
+    if (!value) {
+        alert('Please enter a value');
         return;
     }
-
-    const data = conversionData[category];
-    const fromFactor = data[fromUnit];
-
-    if (category === 'Temperature') {
-        convertTemperature(value, fromUnit);
-    } else {
-        const baseValue = value / fromFactor;
-        const results = document.getElementById('conversionResults');
-        results.innerHTML = Object.entries(data)
-            .map(([unit, factor]) => {
-                const result = (baseValue * factor).toFixed(decimalPlaces).replace(/\.?0+$/, '');
-                return `<div class="result-item"><span class="unit">${unit}</span><span class="value">${result}</span></div>`;
-            })
-            .join('');
-    }
-}
-
-function convertTemperature(value, fromUnit) {
-    let celsius;
-    if (fromUnit === 'Celsius') celsius = value;
-    else if (fromUnit === 'Fahrenheit') celsius = (value - 32) * 5/9;
-    else if (fromUnit === 'Kelvin') celsius = value - 273.15;
-
-    const decimalPlaces = parseInt(localStorage.getItem('decimalPlaces')) || 4;
-
-    const results = {
-        'Celsius': celsius,
-        'Fahrenheit': celsius * 9/5 + 32,
-        'Kelvin': celsius + 273.15
-    };
-
-    const html = Object.entries(results)
-        .map(([unit, val]) => `<div class="result-item"><span class="unit">${unit}</span><span class="value">${val.toFixed(decimalPlaces)}</span></div>`)
-        .join('');
-    document.getElementById('conversionResults').innerHTML = html;
+    
+    fetch('/api/convert-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category, from_unit: fromUnit, value })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const resultsDiv = document.getElementById('conversionResults');
+            const html = Object.entries(data.results)
+                .map(([unit, val]) => `<div class="result-item"><span class="unit">${unit}</span><span class="value">${val}</span></div>`)
+                .join('');
+            resultsDiv.innerHTML = `<h3>Results</h3><div class="results-grid">${html}</div>`;
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(e => alert('Network error: ' + e.message));
 }
 
 // ============= MISC CONVERTER FUNCTIONS =============
 function updateMiscUnits() {
     const category = document.getElementById('miscCategory').value;
-    const units = Object.keys(miscConversionData[category]);
-    const select = document.getElementById('miscFromUnit');
-    select.innerHTML = units.map(u => `<option>${u}</option>`).join('');
+    const fromUnit = document.getElementById('miscFromUnit');
+    const toUnit = document.getElementById('miscToUnit');
+    
+    const units = {
+        'Angle': ['degree (°)', 'radian (rad)'],
+        'Sound Intensity': ['intensity (W/m²)', 'level (dB)'],
+        'Power': ['watt (W)', 'kilowatt (kW)', 'megawatt (MW)', 'horsepower (hp)'],
+        'Pressure': ['pascal (Pa)', 'kilopascal (kPa)', 'bar', 'atmosphere (atm)', 'torr (Torr)', 'pound per square inch (psi)'],
+        'Data': ['bit (b)', 'byte (B)', 'kilobyte (kB)', 'megabyte (MB)', 'gigabyte (GB)', 'terabyte (TB)', 'kibibyte (KiB)', 'mebibyte (MiB)', 'gibibyte (GiB)', 'tebibyte (TiB)'],
+        'Frequency': ['hertz (Hz)', 'kilohertz (kHz)', 'megahertz (MHz)', 'gigahertz (GHz)', 'terahertz (THz)'],
+        'RPM': ['revolutions per minute (RPM)', 'revolutions per second (RPS)', 'hertz (Hz)', 'radians per second (rad/s)'],
+        'Firearm ROF': ['rounds per minute (RPM)', 'rounds per second (RPS)', 'rounds per hour (RPH)']
+    };
+    
+    const unitList = units[category] || [];
+    
+    fromUnit.innerHTML = unitList.map(u => `<option>${u}</option>`).join('');
+    toUnit.innerHTML = unitList.map(u => `<option>${u}</option>`).join('');
 }
 
 function convertMisc() {
     const category = document.getElementById('miscCategory').value;
     const fromUnit = document.getElementById('miscFromUnit').value;
-    const value = parseFloat(document.getElementById('miscInputValue').value);
-    const decimalPlaces = parseInt(localStorage.getItem('decimalPlaces')) || 4;
-
-    if (isNaN(value)) {
-        alert('Enter a valid number');
+    const toUnit = document.getElementById('miscToUnit').value;
+    const value = parseFloat(document.getElementById('miscValue').value) || 0;
+    
+    if (!value) {
+        alert('Please enter a value');
         return;
     }
-
-    const data = miscConversionData[category];
-    const fromFactor = data[fromUnit];
-
-    if (typeof fromFactor === 'string') {
-        convertSpecialMisc(value, category, fromUnit, decimalPlaces);
-    } else {
-        const baseValue = value / fromFactor;
-        const results = document.getElementById('miscResults');
-        results.innerHTML = Object.entries(data)
-            .map(([unit, factor]) => {
-                if (typeof factor === 'string') return '';
-                const result = (baseValue * factor).toFixed(decimalPlaces).replace(/\.?0+$/, '');
-                return `<div class="result-item"><span class="unit">${unit}</span><span class="value">${result}</span></div>`;
-            })
-            .join('');
-    }
-}
-
-function convertSpecialMisc(value, category, fromUnit, decimalPlaces) {
-    const results = document.getElementById('miscResults');
-    if (category === 'Sound Intensity') {
-        const watt = fromUnit === 'Decibel (W/m²)' ? Math.pow(10, value/10) * 1e-12 : value;
-        const db = fromUnit === 'Watt/m²' ? 10 * Math.log10(value / 1e-12) : value;
-        results.innerHTML = `
-            <div class="result-item"><span class="unit">Decibel (W/m²)</span><span class="value">${db.toFixed(decimalPlaces)}</span></div>
-            <div class="result-item"><span class="unit">Watt/m²</span><span class="value">${watt.toFixed(decimalPlaces)}</span></div>
-        `;
-    }
+    
+    fetch('/api/convert-misc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category, from_unit: fromUnit, to_unit: toUnit, value })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const resultsDiv = document.getElementById('miscResults');
+            const html = Object.entries(data.results)
+                .map(([unit, val]) => `<div class="result-item"><span class="unit">${unit}</span><span class="value">${val}</span></div>`)
+                .join('');
+            resultsDiv.innerHTML = `<h3>Results</h3><div class="results-grid">${html}</div>`;
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(e => alert('Network error: ' + e.message));
 }
 
 // ============= CALCULATOR =============
