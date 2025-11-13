@@ -31,6 +31,7 @@ function goToConverter() {
     showPage('converterPage');
     loadConverterPreferences();
     updateUnits();
+    wireEnterHandlers();
 }
 function goToCalculator() { 
     showPage('calculatorPage'); 
@@ -40,6 +41,7 @@ function goToMiscConverter() {
     showPage('miscPage');
     loadMiscConverterPreferences();
     updateMiscUnits();
+    wireEnterHandlers();
 }
 function goToGraphing() { showPage('graphingPage'); }
 function goToSettings() { showPage('settingsPage'); }
@@ -109,7 +111,10 @@ function setupSettingsListeners() {
 // ============= SETTINGS =============
 function applyTheme() {
     const theme = document.getElementById('themeSetting').value;
-    if (theme === 'dark') {
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const effective = (theme === 'auto') ? (prefersDark ? 'dark' : 'light') : theme;
+
+    if (effective === 'dark') {
         document.body.classList.remove('light-theme');
     } else {
         document.body.classList.add('light-theme');
@@ -127,9 +132,12 @@ let shouldResetDisplay = false;
 
 // ============= PAGE INITIALIZATION =============
 document.addEventListener('DOMContentLoaded', () => {
+    // basic calc init
     calcClear();
+    // converter/misc unit lists
     updateUnits();
     updateMiscUnits();
+    // calculators init
     sciClear();
     progRefresh();
 });
@@ -138,107 +146,12 @@ window.addEventListener('load', () => {
     loadAllSettings();
     applyTheme();
     setupSettingsListeners();
+    wireEnterHandlers();
 });
 
 window.addEventListener('beforeunload', () => {
     saveAllSettings();
 });
-
-// ============= CONVERTER DATA =============
-const conversionData = {
-    'Length': {
-        'Meter': 1,
-        'Kilometer': 0.001,
-        'Centimeter': 100,
-        'Millimeter': 1000,
-        'Mile': 0.000621371,
-        'Yard': 1.09361,
-        'Foot': 3.28084,
-        'Inch': 39.3701
-    },
-    'Mass': {
-        'Kilogram': 1,
-        'Gram': 1000,
-        'Milligram': 1000000,
-        'Pound': 2.20462,
-        'Ounce': 35.274
-    },
-    'Time': {
-        'Second': 1,
-        'Millisecond': 1000,
-        'Minute': 1/60,
-        'Hour': 1/3600,
-        'Day': 1/86400
-    },
-    'Temperature': {
-        'Celsius': 'c',
-        'Fahrenheit': 'f',
-        'Kelvin': 'k'
-    },
-    'Area': {
-        'Square Meter': 1,
-        'Square Kilometer': 0.000001,
-        'Square Centimeter': 10000,
-        'Square Mile': 3.861e-7,
-        'Square Yard': 1.19599,
-        'Square Foot': 10.7639,
-        'Hectare': 0.0001
-    },
-    'Volume': {
-        'Liter': 1,
-        'Milliliter': 1000,
-        'Cubic Meter': 0.001,
-        'Gallon': 0.264172,
-        'Quart': 1.05669,
-        'Pint': 2.11338,
-        'Cup': 4.22675
-    },
-    'Speed': {
-        'Meter/Second': 1,
-        'Kilometer/Hour': 3.6,
-        'Mile/Hour': 2.23694,
-        'Knot': 1.94384
-    }
-};
-
-const miscConversionData = {
-    'Angle': {
-        'Radian': 1,
-        'Degree': 57.2958,
-        'Gradian': 63.6620
-    },
-    'Sound Intensity': {
-        'Decibel (W/m²)': 1,
-        'Watt/m²': 'db'
-    },
-    'Power': {
-        'Watt': 1,
-        'Kilowatt': 0.001,
-        'Megawatt': 0.000001,
-        'Horsepower': 0.00134102,
-        'BTU/hour': 3.41214
-    },
-    'Pressure': {
-        'Pascal': 1,
-        'Kilopascal': 0.001,
-        'Bar': 0.00001,
-        'PSI': 0.000145038,
-        'Atmosphere': 0.00000986923
-    },
-    'Data': {
-        'Byte': 1,
-        'Kilobyte': 0.001,
-        'Megabyte': 0.000001,
-        'Gigabyte': 0.000000001,
-        'Terabyte': 0.000000000001
-    },
-    'Frequency': {
-        'Hertz': 1,
-        'Kilohertz': 0.001,
-        'Megahertz': 0.000001,
-        'Gigahertz': 0.000000001
-    }
-};
 
 // ============= CONVERTER FUNCTIONS =============
 function updateUnits() {
@@ -266,9 +179,9 @@ function convertUnits() {
     const category = document.getElementById('category').value;
     const fromUnit = document.getElementById('fromUnit').value;
     const toUnit = document.getElementById('toUnit').value;
-    const value = parseFloat(document.getElementById('conversionValue').value) || 0;
+    const value = parseFloat(document.getElementById('conversionValue').value);
     
-    if (!value) {
+    if (isNaN(value)) {
         alert('Please enter a value');
         return;
     }
@@ -281,11 +194,10 @@ function convertUnits() {
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            const resultsDiv = document.getElementById('conversionResults');
-            const html = Object.entries(data.results)
+            const grid = document.getElementById('conversionResults');
+            grid.innerHTML = Object.entries(data.results)
                 .map(([unit, val]) => `<div class="result-item"><span class="unit">${unit}</span><span class="value">${val}</span></div>`)
                 .join('');
-            resultsDiv.innerHTML = `<h3>Results</h3><div class="results-grid">${html}</div>`;
         } else {
             alert('Error: ' + data.error);
         }
@@ -320,9 +232,9 @@ function convertMisc() {
     const category = document.getElementById('miscCategory').value;
     const fromUnit = document.getElementById('miscFromUnit').value;
     const toUnit = document.getElementById('miscToUnit').value;
-    const value = parseFloat(document.getElementById('miscValue').value) || 0;
+    const value = parseFloat(document.getElementById('miscValue').value);
     
-    if (!value) {
+    if (isNaN(value)) {
         alert('Please enter a value');
         return;
     }
@@ -339,7 +251,7 @@ function convertMisc() {
             const html = Object.entries(data.results)
                 .map(([unit, val]) => `<div class="result-item"><span class="unit">${unit}</span><span class="value">${val}</span></div>`)
                 .join('');
-            resultsDiv.innerHTML = `<h3>Results</h3><div class="results-grid">${html}</div>`;
+            resultsDiv.innerHTML = html;
         } else {
             alert('Error: ' + data.error);
         }
@@ -474,6 +386,21 @@ function calcEquals() {
         updateCalcOperation();
         setTimeout(() => calcClear(), 1500);
     }
+}
+
+function calcBackspace() {
+    if (shouldResetDisplay) {
+        calcDisplay = '0';
+        shouldResetDisplay = false;
+    } else {
+        if (calcDisplay.length > 1) {
+            calcDisplay = calcDisplay.slice(0, -1);
+        } else {
+            calcDisplay = '0';
+        }
+    }
+    updateCalcDisplay();
+    updateCalcOperation();
 }
 
 // ============= SCIENTIFIC CALCULATOR =============
@@ -1189,4 +1116,21 @@ function calculateTTK() {
             alert('Error: ' + d.error);
         }
     });
+}
+
+// ============= INITIALIZE HELPERS =============
+function wireEnterHandlers() {
+    const enterEnabled = localStorage.getItem('enterToConvert') !== 'false';
+    const conv = document.getElementById('conversionValue');
+    if (conv) {
+        conv.onkeydown = (e) => {
+            if (e.key === 'Enter' && enterEnabled) convertUnits();
+        };
+    }
+    const misc = document.getElementById('miscValue');
+    if (misc) {
+        misc.onkeydown = (e) => {
+            if (e.key === 'Enter' && enterEnabled) convertMisc();
+        };
+    }
 }

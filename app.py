@@ -206,7 +206,9 @@ def api_convert_misc():
             elif category == "Firearm ROF":
                 results[to_unit] = format_number(convert_firearm_rof(from_unit, to_unit, value))
             else:
-                results[to_unit] = format_number(linear_convert(value, from_unit, to_unit, FACTORS[category]))
+                # Use uppercase keys for FACTORS (e.g., 'Power' -> 'POWER')
+                cat_key = category.upper()
+                results[to_unit] = format_number(linear_convert(value, from_unit, to_unit, FACTORS[cat_key]))
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
     
