@@ -146,7 +146,8 @@ def api_convert():
         if category == "Temperature":
             result = convert_temperature(from_unit, to_unit, value)
         else:
-            result = linear_convert(value, from_unit, to_unit, FACTORS[category])
+            cat_key = category.upper()
+            result = linear_convert(value, from_unit, to_unit, FACTORS[cat_key])
         
         return jsonify({"success": True, "result": format_number(result)})
     except Exception as e:
@@ -176,7 +177,8 @@ def api_convert_all():
             if category == "Temperature":
                 results[to_unit] = format_number(convert_temperature(from_unit, to_unit, value))
             else:
-                results[to_unit] = format_number(linear_convert(value, from_unit, to_unit, FACTORS[category]))
+                cat_key = category.upper()
+                results[to_unit] = format_number(linear_convert(value, from_unit, to_unit, FACTORS[cat_key]))
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
     
@@ -251,43 +253,26 @@ def convert_misc_rpm(from_unit, to_unit, value):
     """Convert between RPM and related rotational/frequency units."""
     if from_unit == to_unit:
         return value
-    
-    to_rpm = {
+    unit_to_rpm = {
         "revolutions per minute (RPM)": 1.0,
-        "revolutions per second (RPS)": 1.0 / 60.0,
-        "hertz (Hz)": 1.0 / 60.0,
-        "radians per second (rad/s)": 1.0 / (60.0 / (2 * math.pi))
+        "revolutions per second (RPS)": 60.0,                 # rpm = rps * 60
+        "hertz (Hz)": 60.0,                                   # rpm = Hz * 60
+        "radians per second (rad/s)": 60.0 / (2 * math.pi)    # rpm = rad/s * 60/(2π)
     }
-    
-    from_rpm = {
-        "revolutions per minute (RPM)": 1.0,
-        "revolutions per second (RPS)": 60.0,
-        "hertz (Hz)": 60.0,
-        "radians per second (rad/s)": 60.0 / (2 * math.pi)
-    }
-    
-    rpm_value = value / to_rpm[from_unit]
-    return rpm_value * from_rpm[to_unit]
+    base_rpm = value * unit_to_rpm[from_unit]
+    return base_rpm / unit_to_rpm[to_unit]
 
 def convert_firearm_rof(from_unit, to_unit, value):
     """Convert between firearm rate of fire units."""
     if from_unit == to_unit:
         return value
-    
-    to_rpm = {
+    unit_to_rpm = {
         "rounds per minute (RPM)": 1.0,
-        "rounds per second (RPS)": 1.0 / 60.0,
-        "rounds per hour (RPH)": 1.0 / 60.0
+        "rounds per second (RPS)": 60.0,      # rpm = rps * 60
+        "rounds per hour (RPH)": 1.0 / 60.0   # rpm = rph / 60
     }
-    
-    from_rpm = {
-        "rounds per minute (RPM)": 1.0,
-        "rounds per second (RPS)": 60.0,
-        "rounds per hour (RPH)": 60.0
-    }
-    
-    rpm_value = value / to_rpm[from_unit]
-    return rpm_value * from_rpm[to_unit]
+    base_rpm = value * unit_to_rpm[from_unit]
+    return base_rpm / unit_to_rpm[to_unit]
 
 @app.route('/api/calculate', methods=['POST'])
 def api_calculate():
@@ -380,24 +365,23 @@ def api_game_rpm_convert():
     
     try:
         if conversion_type == 'RPM':
-            rpm_units = {
+            unit_to_rpm = {
                 "RPM (Revolutions/Min)": 1.0,
-                "RPS (Revolutions/Sec)": 60.0,
-                "Hz (Cycles/Sec)": 60.0,
-                "rad/s (Radians/Sec)": 60.0 / (2 * math.pi)
+                "RPS (Revolutions/Sec)": 60.0,                # rpm = rps * 60
+                "Hz (Cycles/Sec)": 60.0,                      # rpm = Hz * 60
+                "rad/s (Radians/Sec)": 60.0 / (2 * math.pi)   # rpm = rad/s * 60/(2π)
             }
         else:  # Firearm
-            rpm_units = {
+            unit_to_rpm = {
                 "RPM (Rounds/Min)": 1.0,
-                "RPS (Rounds/Sec)": 60.0,
-                "RPH (Rounds/Hour)": 1.0 / 60.0
+                "RPS (Rounds/Sec)": 60.0,     # rpm = rps * 60
+                "RPH (Rounds/Hour)": 1.0 / 60.0  # rpm = rph / 60
             }
         
-        base_value = value / rpm_units[from_unit]
+        base_rpm = value * unit_to_rpm[from_unit]
         results = {}
-        
-        for unit, factor in rpm_units.items():
-            results[unit] = format_number(base_value * factor)
+        for unit, factor in unit_to_rpm.items():
+            results[unit] = format_number(base_rpm / factor)
         
         return jsonify({"success": True, "results": results})
     except Exception as e:

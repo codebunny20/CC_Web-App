@@ -311,6 +311,21 @@ function calcInput(val) {
     updateCalcDisplay();
     updateCalcOperation();
 }
+// Add wrapper used by the Basic calc buttons and support %
+function calcOperator(op) {
+    if (op === '%') {
+        const current = parseFloat(calcDisplay);
+        if (!isNaN(current)) {
+            calcDisplay = (current / 100).toString();
+            shouldResetDisplay = false;
+        }
+        updateCalcDisplay();
+        updateCalcOperation();
+        return;
+    }
+    // Forward +, -, *, / to calcInput
+    calcInput(op);
+}
 
 function updateCalcDisplay() {
     const display = document.getElementById('calcDisplay');
