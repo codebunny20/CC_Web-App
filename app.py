@@ -99,6 +99,8 @@ MISC_UNITS = {
     "Firearm ROF": ["rounds per minute (RPM)", "rounds per second (RPS)", "rounds per hour (RPH)"]
 }
 
+VERSION = "1.0.0"
+
 def format_number(v):
     """Format conversion result for display."""
     if v == 0:
@@ -107,6 +109,12 @@ def format_number(v):
     if abs_v >= 1e6 or abs_v < 1e-3:
         return f"{v:.6g}"
     return f"{v:.6f}".rstrip("0").rstrip(".")
+
+def format_number_dp(v, dp):
+    """Format with fixed decimal places if dp >= 0."""
+    if dp < 0:
+        return format_number(v)
+    return f"{v:.{dp}f}".rstrip("0").rstrip(".")
 
 def linear_convert(value, from_unit, to_unit, factors):
     """Generic linear unit conversion."""
@@ -160,6 +168,7 @@ def api_convert_all():
     category = data.get('category', 'Length')
     from_unit = data.get('from_unit')
     value = float(data.get('value', 0))
+    decimal_places = int(data.get('decimal_places', -1))
     
     units = {
         "Length": list(FACTORS["LENGTH"].keys()),
@@ -175,10 +184,11 @@ def api_convert_all():
     try:
         for to_unit in units:
             if category == "Temperature":
-                results[to_unit] = format_number(convert_temperature(from_unit, to_unit, value))
+                value_conv = convert_temperature(from_unit, to_unit, value)
             else:
                 cat_key = category.upper()
-                results[to_unit] = format_number(linear_convert(value, from_unit, to_unit, FACTORS[cat_key]))
+                value_conv = linear_convert(value, from_unit, to_unit, FACTORS[cat_key])
+            results[to_unit] = format_number_dp(value_conv, decimal_places)
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
     
@@ -192,25 +202,27 @@ def api_convert_misc():
     category = data.get('category', 'Angle')
     from_unit = data.get('from_unit')
     value = float(data.get('value', 0))
+    decimal_places = int(data.get('decimal_places', -1))
     
     results = {}
     try:
         units = MISC_UNITS.get(category, [])
         for to_unit in units:
             if category == "Angle":
-                results[to_unit] = format_number(convert_misc_angle(from_unit, to_unit, value))
+                conv = convert_misc_angle(from_unit, to_unit, value)
             elif category == "Sound Intensity":
-                results[to_unit] = format_number(convert_misc_sound_intensity(from_unit, to_unit, value))
+                conv = convert_misc_sound_intensity(from_unit, to_unit, value)
             elif category == "Frequency":
-                results[to_unit] = format_number(convert_misc_frequency(from_unit, to_unit, value))
+                conv = convert_misc_frequency(from_unit, to_unit, value)
             elif category == "RPM":
-                results[to_unit] = format_number(convert_misc_rpm(from_unit, to_unit, value))
+                conv = convert_misc_rpm(from_unit, to_unit, value)
             elif category == "Firearm ROF":
-                results[to_unit] = format_number(convert_firearm_rof(from_unit, to_unit, value))
+                conv = convert_firearm_rof(from_unit, to_unit, value)
             else:
                 # Use uppercase keys for FACTORS (e.g., 'Power' -> 'POWER')
                 cat_key = category.upper()
-                results[to_unit] = format_number(linear_convert(value, from_unit, to_unit, FACTORS[cat_key]))
+                conv = linear_convert(value, from_unit, to_unit, FACTORS[cat_key])
+            results[to_unit] = format_number_dp(conv, decimal_places)
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
     
@@ -362,6 +374,7 @@ def api_game_rpm_convert():
     conversion_type = data.get('conversion_type', 'RPM')
     from_unit = data.get('from_unit')
     value = float(data.get('value', 0))
+    decimal_places = int(data.get('decimal_places', -1))
     
     try:
         if conversion_type == 'RPM':
@@ -381,7 +394,7 @@ def api_game_rpm_convert():
         base_rpm = value * unit_to_rpm[from_unit]
         results = {}
         for unit, factor in unit_to_rpm.items():
-            results[unit] = format_number(base_rpm / factor)
+            results[unit] = format_number_dp(base_rpm / factor, decimal_places)
         
         return jsonify({"success": True, "results": results})
     except Exception as e:
@@ -491,6 +504,10 @@ def api_game_ttk():
         return jsonify({"success": True, "results": results})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
+
+@app.route('/api/version')
+def api_version():
+    return jsonify({"success": True, "version": VERSION})
 
 @app.errorhandler(404)
 def not_found(error):

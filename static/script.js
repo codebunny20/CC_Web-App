@@ -1,12 +1,18 @@
 // ============= DROPDOWN MENU =============
+const APP_VERSION = 'v1.0.0';
+
 function toggleDropdown() {
     const dropdown = document.getElementById('toolsDropdown');
     dropdown.classList.toggle('active');
+    const btn = document.querySelector('.dropdown-btn');
+    if (btn) btn.setAttribute('aria-expanded', dropdown.classList.contains('active') ? 'true' : 'false');
 }
 
 function closeDropdown() {
     const dropdown = document.getElementById('toolsDropdown');
-    dropdown.classList.remove('active');
+    if (dropdown) dropdown.classList.remove('active');
+    const btn = document.querySelector('.dropdown-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
 }
 
 // Close dropdown when clicking outside
@@ -16,6 +22,10 @@ document.addEventListener('click', (e) => {
     if (!dropdownContainer.contains(e.target)) {
         closeDropdown();
     }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDropdown();
 });
 
 // ============= PAGE NAVIGATION =============
@@ -109,7 +119,7 @@ function setupSettingsListeners() {
 }
 
 // ============= SETTINGS =============
-function applyTheme() {
+function applyTheme(markChanged = true) {
     const theme = document.getElementById('themeSetting').value;
     const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     const effective = (theme === 'auto') ? (prefersDark ? 'dark' : 'light') : theme;
@@ -120,7 +130,7 @@ function applyTheme() {
         document.body.classList.add('light-theme');
     }
     localStorage.setItem('theme', theme);
-    markSettingsChanged();
+    if (markChanged) markSettingsChanged();
     if (graphState) drawGraph();
 }
 
@@ -140,11 +150,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // calculators init
     sciClear();
     progRefresh();
+    loadCalculatorState();
+    // Inject version badge
+    const header = document.querySelector('.header h1');
+    if (header && !document.getElementById('appVersionBadge')) {
+        const span = document.createElement('span');
+        span.id = 'appVersionBadge';
+        span.className = 'badge-version';
+        span.textContent = APP_VERSION;
+        header.appendChild(span);
+    }
 });
 
 window.addEventListener('load', () => {
     loadAllSettings();
-    applyTheme();
+    applyTheme(false); // avoid marking changed on initial load
     setupSettingsListeners();
     wireEnterHandlers();
 });
@@ -154,6 +174,16 @@ window.addEventListener('beforeunload', () => {
 });
 
 // ============= CONVERTER FUNCTIONS =============
+function getDecimalPlacesSetting() {
+    const stored = localStorage.getItem('decimalPlaces');
+    const inputEl = document.getElementById('decimalPlaces');
+    let dp = stored !== null ? parseInt(stored, 10) : 4;
+    if (inputEl && !isNaN(parseInt(inputEl.value,10))) dp = parseInt(inputEl.value,10);
+    if (isNaN(dp) || dp < 0) dp = 4;
+    if (dp > 10) dp = 10;
+    return dp;
+}
+
 function updateUnits() {
     const category = document.getElementById('category').value;
     const fromUnit = document.getElementById('fromUnit');
@@ -186,10 +216,11 @@ function convertUnits() {
         return;
     }
     
+    const decimal_places = getDecimalPlacesSetting();
     fetch('/api/convert-all', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category, from_unit: fromUnit, value })
+        body: JSON.stringify({ category, from_unit: fromUnit, value, decimal_places })
     })
     .then(r => r.json())
     .then(data => {
@@ -233,6 +264,7 @@ function convertMisc() {
     const fromUnit = document.getElementById('miscFromUnit').value;
     const toUnit = document.getElementById('miscToUnit').value;
     const value = parseFloat(document.getElementById('miscValue').value);
+    const decimal_places = getDecimalPlacesSetting();
     
     if (isNaN(value)) {
         alert('Please enter a value');
@@ -242,7 +274,7 @@ function convertMisc() {
     fetch('/api/convert-misc', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category, from_unit: fromUnit, to_unit: toUnit, value })
+        body: JSON.stringify({ category, from_unit: fromUnit, to_unit: toUnit, value, decimal_places })
     })
     .then(r => r.json())
     .then(data => {
@@ -971,6 +1003,7 @@ function convertGameRpm() {
     const type = document.getElementById('gameRpmType').value;
     const fromUnit = document.getElementById('gameRpmFromUnit').value;
     const value = parseFloat(document.getElementById('gameRpmValue').value);
+    const decimal_places = getDecimalPlacesSetting();
     
     if (isNaN(value)) {
         alert('Enter a valid number');
@@ -983,7 +1016,8 @@ function convertGameRpm() {
         body: JSON.stringify({
             conversion_type: type,
             from_unit: fromUnit,
-            value: value
+            value: value,
+            decimal_places
         })
     })
     .then(r => r.json())
